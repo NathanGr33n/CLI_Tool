@@ -1,0 +1,278 @@
+# CLI Agent - Git Ignore File
+# This file prevents sensitive data and build artifacts from being committed to the repository
+
+# === NODE.JS ===
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist/
+
+# === BUILD ARTIFACTS ===
+# Compiled JavaScript output
+dist/
+build/
+out/
+lib/
+
+# Warp
+WARP.md
+
+# TypeScript compiled files
+*.js.map
+*.d.ts.map
+
+# === ENVIRONMENT & CONFIGURATION ===
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# CLI Agent configuration files (may contain sensitive settings)
+.cli-agent.yml
+.cli-agent.yaml
+cli-agent.config.js
+cli-agent.config.json
+
+# User-specific configuration
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# === LOGS & TEMPORARY FILES ===
+# Log files
+logs/
+*.log
+
+# Runtime logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary folders
+tmp/
+temp/
+
+# === OPERATING SYSTEM FILES ===
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+
+# === SECURITY & SENSITIVE DATA ===
+# API keys and secrets
+secrets/
+.secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Authentication tokens
+.token
+.auth
+credentials.json
+service-account.json
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# === DEVELOPMENT TOOLS ===
+# Testing
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Profiling
+*.cpuprofile
+*.heapprofile
+
+# === PACKAGE MANAGERS ===
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# pnpm
+.pnpm-store/
+
+# === CLI AGENT SPECIFIC ===
+# Session data and user activity
+.sessions/
+session-*.json
+activity.log
+usage.log
+
+# Generated output files from agent operations
+output/
+generated/
+agent-output/
+
+# User data and caches
+.user-data/
+.cache/
+.cli-agent-cache/
+
+# Temporary working directories
+.workspace/
+.scratch/
+
+# Configuration backups
+*.yml.bak
+*.yaml.bak
+config.backup.*
+
+# === PROJECT SPECIFIC ===
+# Test artifacts
+test-output/
+test-reports/
+screenshots/
+
+# Documentation build
+docs/build/
+.docusaurus/
+
+# === EDITOR & IDE ===
+# Vim
+*.swp
+*.swo
+.vimrc.local
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# === MISC ===
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# System files
+*.tmp
+*.temp
+
+# === ALLOW EXCEPTIONS ===
+# Keep example configurations (non-sensitive)
+!example.cli-agent.yml
+!sample.config.json
+!docs/examples/
+
+# Keep important documentation
+!README.md
+!LICENSE
+!CHANGELOG.md
