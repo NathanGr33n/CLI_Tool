@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <title>CLI Agent</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../../node_modules/@xterm/xterm/css/xterm.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Title bar (optional, can be removed if using native title bar) -->
+        <div class="title-bar">
+            <div class="title-bar-title">CLI Agent</div>
+            <div class="title-bar-controls">
+                <!-- Controls handled by native window frame -->
+            </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar">
+            <div class="tabs-container" id="tabs-container">
+                <!-- Tabs will be dynamically created here -->
+            </div>
+            <div class="tab-controls">
+                <button class="new-tab-btn" id="new-tab-btn" title="New Tab (Ctrl+T)">
+                    <svg width="16" height="16" viewBox="0 0 16 16">
+                        <path fill="currentColor" d="M8 3.5a.5.5 0 0 1 .5.5v3.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                </button>
+                <div class="shell-selector">
+                    <button class="shell-btn" data-shell="powershell" title="New PowerShell Tab">PS</button>
+                    <button class="shell-btn" data-shell="cmd" title="New CMD Tab">CMD</button>
+                    <button class="shell-btn" data-shell="wsl" title="New WSL Tab">WSL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal content area -->
+        <div class="terminal-area" id="terminal-area">
+            <!-- Terminal instances will be created here -->
+        </div>
+
+        <!-- Agent sidebar (initially hidden, can be toggled) -->
+        <div class="agent-sidebar" id="agent-sidebar">
+            <div class="sidebar-header">
+                <h3>AI Agent</h3>
+                <button class="close-sidebar-btn" id="close-sidebar-btn">&times;</button>
+            </div>
+            <div class="agent-chat-container">
+                <div class="agent-messages" id="agent-messages">
+                    <!-- Agent chat messages will appear here -->
+                </div>
+                <div class="agent-input-container">
+                    <input type="text" class="agent-input" id="agent-input" placeholder="Ask the agent anything...">
+                    <button class="agent-send-btn" id="agent-send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="current-shell">PowerShell</span>
+                <span class="separator">|</span>
+                <span id="current-directory">~</span>
+            </div>
+            <div class="status-right">
+                <button class="agent-toggle-btn" id="agent-toggle-btn" title="Toggle AI Agent">
+                    <svg width="16" height="16" viewBox="0 0 16 16">
+                        <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </button>
+                <span class="separator">|</span>
+                <span id="connection-status">Connected</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context menu (hidden by default) -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" data-action="copy">Copy</div>
+        <div class="context-menu-item" data-action="paste">Paste</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="select-all">Select All</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="new-tab">New Tab</div>
+        <div class="context-menu-item" data-action="close-tab">Close Tab</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

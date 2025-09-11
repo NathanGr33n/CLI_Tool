@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+const fs = require('fs-extra');
+const path = require('path');
+
+async function copyStaticFiles() {
+  try {
+    // Ensure dist/renderer directory exists
+    await fs.ensureDir('dist/renderer');
+    
+    // Copy HTML files
+    await fs.copy('src/renderer/index.html', 'dist/renderer/index.html');
+    console.log('✓ Copied index.html');
+    
+    // Copy CSS files
+    await fs.copy('src/renderer/styles.css', 'dist/renderer/styles.css');
+    console.log('✓ Copied styles.css');
+    
+    // The JavaScript files should already be compiled by tsc, but let's make sure
+    // If the compiled app.js doesn't exist, we can't copy from src since it's TypeScript
+    const appJsExists = await fs.pathExists('dist/renderer/app.js');
+    if (appJsExists) {
+      console.log('✓ app.js already compiled by TypeScript');
+    } else {
+      console.log('⚠️  app.js not found - make sure to run tsc first');
+    }
+    
+    console.log('Static files copied successfully!');
+  } catch (error) {
+    console.error('Error copying static files:', error);
+    process.exit(1);
+  }
+}
+
+copyStaticFiles();
