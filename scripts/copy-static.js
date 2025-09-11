@@ -16,6 +16,10 @@ async function copyStaticFiles() {
     await fs.copy('src/renderer/styles.css', 'dist/renderer/styles.css');
     console.log('✓ Copied styles.css');
     
+    // Copy xterm.css from node_modules
+    await fs.copy('node_modules/@xterm/xterm/css/xterm.css', 'dist/renderer/xterm.css');
+    console.log('✓ Copied xterm.css');
+    
     // The JavaScript files should already be compiled by tsc, but let's make sure
     // If the compiled app.js doesn't exist, we can't copy from src since it's TypeScript
     const appJsExists = await fs.pathExists('dist/renderer/app.js');

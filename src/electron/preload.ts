@@ -27,6 +27,7 @@ interface ElectronAPI {
   agentAnalyzeProject: () => Promise<any>;
   agentGetCapabilities: () => Promise<string[]>;
   agentChangeDirectory: (newPath: string) => Promise<{ success: boolean }>;
+  terminalResize: (sessionId: string, cols: number, rows: number) => Promise<{ success: boolean }>;
 }
 
 // Expose protected methods that allow the renderer process to use
@@ -76,7 +77,8 @@ const electronAPI: ElectronAPI = {
   agentExecuteActions: (actionIds: string[]) => ipcRenderer.invoke('agent-execute-actions', actionIds),
   agentAnalyzeProject: () => ipcRenderer.invoke('agent-analyze-project'),
   agentGetCapabilities: () => ipcRenderer.invoke('agent-get-capabilities'),
-  agentChangeDirectory: (newPath: string) => ipcRenderer.invoke('agent-change-directory', newPath)
+  agentChangeDirectory: (newPath: string) => ipcRenderer.invoke('agent-change-directory', newPath),
+  terminalResize: (sessionId: string, cols: number, rows: number) => ipcRenderer.invoke('terminal-resize', sessionId, cols, rows)
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -23,6 +23,7 @@ declare global {
       agentExecuteActions: (actionIds: string[]) => Promise<any[]>;
       agentAnalyzeProject: () => Promise<any>;
       agentGetCapabilities: () => Promise<string[]>;
+      terminalResize: (sessionId: string, cols: number, rows: number) => Promise<{ success: boolean }>;
     };
   }
 }
@@ -45,10 +46,20 @@ class TerminalApp {
   private agentSidebarOpen = false;
 
   constructor() {
-    this.setupEventListeners();
-    this.setupElectronListeners();
-    this.initializeAgent();
-    this.createInitialTab();
+    console.log('🏠 TerminalApp constructor called');
+    try {
+      this.setupEventListeners();
+      console.log('✓ Event listeners set up');
+      this.setupElectronListeners();
+      console.log('✓ Electron listeners set up');
+      this.initializeAgent();
+      console.log('✓ Agent initialization started');
+      this.createInitialTab();
+      console.log('✓ Initial tab creation started');
+    } catch (error) {
+      console.error('❌ Error in TerminalApp constructor:', error);
+      throw error;
+    }
   }
 
   private setupEventListeners(): void {
@@ -134,9 +145,11 @@ class TerminalApp {
 
   private setupElectronListeners(): void {
     if (!window.electronAPI) {
-      console.error('Electron API not available');
+      console.error('❌ Electron API not available');
       return;
     }
+    
+    console.log('✓ Electron API available, setting up listeners...');
 
     // Handle shell output
     window.electronAPI.onShellOutput((sessionId: string, data: string) => {
@@ -165,7 +178,22 @@ class TerminalApp {
   }
 
   private async createInitialTab(): Promise<void> {
-    await this.createTab('powershell');
+    console.log('🎯 Starting initial tab creation...');
+    try {
+      await this.createTab('powershell');
+      console.log('✓ Initial tab created successfully');
+    } catch (error) {
+      console.error('❌ Failed to create initial tab:', error);
+      // Try to create a fallback tab with cmd if powershell fails
+      try {
+        console.log('🔄 Trying fallback CMD tab...');
+        await this.createTab('cmd');
+        console.log('✓ Fallback CMD tab created successfully');
+      } catch (fallbackError) {
+        console.error('❌ Fallback tab creation also failed:', fallbackError);
+        this.showError('Failed to create any terminal session. Please check that PowerShell or CMD are available on your system.');
+      }
+    }
   }
 
   private generateTabId(): string {
@@ -174,16 +202,21 @@ class TerminalApp {
 
   private async createTab(shellType: string): Promise<void> {
     const tabId = this.generateTabId();
+    console.log(`🆕 Creating new tab: ${tabId} (${shellType})`);
     
     try {
       // Create shell session
+      console.log(`🔧 Requesting shell session for ${shellType}...`);
       const sessionResult = await window.electronAPI.createShellSession(shellType);
+      console.log('📊 Shell session result:', sessionResult);
+      
       if (!sessionResult.success) {
         throw new Error(sessionResult.error || 'Failed to create shell session');
       }
 
       const sessionId = sessionResult.sessionId!;
       const title = sessionResult.title || shellType;
+      console.log(`✓ Shell session created: ${sessionId} (${title})`);
 
       // Create tab element
       const tabElement = this.createTabElement(tabId, title);
@@ -234,13 +267,31 @@ class TerminalApp {
       
       // Handle terminal input
       terminal.onData((data) => {
+        console.log(`📥 Terminal input for ${sessionId}:`, JSON.stringify(data));
         window.electronAPI.shellInput(sessionId, data);
       });
 
-      // Fit terminal to container
+      // Fit terminal to container and handle resize
       setTimeout(() => {
-        fitAddon.fit();
-      }, 100);
+        try {
+          fitAddon.fit();
+          // Send resize information to backend
+          const { cols, rows } = terminal;
+          console.log(`📱 Terminal sized to ${cols}x${rows}`);
+          window.electronAPI.terminalResize(sessionId, cols, rows);
+          // Focus terminal for immediate interaction
+          terminal.focus();
+          console.log('✓ Terminal fitted and focused');
+        } catch (error) {
+          console.error('❌ Error during terminal setup:', error);
+        }
+      }, 200);
+      
+      // Handle terminal resize events
+      terminal.onResize(({ cols, rows }) => {
+        console.log(`📱 Terminal resized: ${cols}x${rows}`);
+        window.electronAPI.terminalResize(sessionId, cols, rows);
+      });
 
       // Store tab info
       const tabInfo: TabInfo = {
@@ -263,8 +314,14 @@ class TerminalApp {
       this.updateStatus(shellType);
 
     } catch (error) {
-      console.error('Failed to create tab:', error);
-      this.showError(`Failed to create ${shellType} tab: ${error}`);
+      console.error(`❌ Failed to create ${shellType} tab:`, error);
+      this.showError(`Failed to create ${shellType} tab: ${(error as Error).message || error}`);
+      // Don't let a single tab failure crash the whole app
+      if (this.tabs.size === 0) {
+        console.warn('⚠️  No tabs available, trying to create a basic terminal...');
+        // If this was our only/first tab, try a different approach
+        setTimeout(() => this.createInitialTab(), 1000);
+      }
     }
   }
 
@@ -378,13 +435,18 @@ class TerminalApp {
   }
 
   private handleShellOutput(sessionId: string, data: string): void {
+    console.log(`📤 Received shell output for ${sessionId}:`, data.slice(0, 100) + (data.length > 100 ? '...' : ''));
+    
     // Find the tab with this session ID
     for (const tab of this.tabs.values()) {
       if (tab.sessionId === sessionId && tab.terminal) {
+        console.log(`✓ Writing to terminal for tab ${tab.id}`);
         tab.terminal.write(data);
-        break;
+        return;
       }
     }
+    
+    console.warn(`⚠️  No terminal found for session ${sessionId}`);
   }
 
   private handleShellExit(sessionId: string, exitCode: number): void {
@@ -414,6 +476,15 @@ class TerminalApp {
     if (activeTab && activeTab.terminal && activeTab.fitAddon) {
       setTimeout(() => {
         activeTab.fitAddon!.fit();
+        
+        // Notify backend of resize if session exists
+        if (activeTab.sessionId) {
+          const { cols, rows } = activeTab.terminal!;
+          window.electronAPI.terminalResize(activeTab.sessionId, cols, rows);
+        }
+        
+        // Refocus terminal after resize
+        activeTab.terminal!.focus();
       }, 100);
     }
   }
@@ -546,14 +617,55 @@ class TerminalApp {
   }
 
   private showError(message: string): void {
-    console.error(message);
-    // TODO: Show proper error notification
+    console.error('❌ Error:', message);
+    
+    // Show error in terminal area if no terminal is available
+    const terminalArea = document.getElementById('terminal-area');
+    if (terminalArea && this.tabs.size === 0) {
+      terminalArea.innerHTML = `
+        <div class="error-container" style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: var(--accent-red);
+          text-align: center;
+          padding: 40px;
+        ">
+          <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+          <div style="font-size: 16px; margin-bottom: 12px; font-weight: 600;">Terminal Error</div>
+          <div style="font-size: 14px; color: var(--text-muted); max-width: 500px;">${message}</div>
+          <button onclick="window.location.reload()" style="
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+          ">Retry</button>
+        </div>
+      `;
+    }
+    
+    // Also show in console for debugging
+    if (window.electronAPI) {
+      // Could add notification system here later
+    }
   }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new TerminalApp();
+  console.log('🎯 DOM Content Loaded - Initializing Terminal App...');
+  try {
+    new TerminalApp();
+    console.log('✓ Terminal App initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize Terminal App:', error);
+  }
 });
 
 // Handle app cleanup
