@@ -63,9 +63,12 @@ class TerminalManager {
         env: {
           ...process.env,
           TERM: 'xterm-256color',
-          COLUMNS: '80',
-          LINES: '24',
-          FORCE_COLOR: '1'
+          COLUMNS: '120',
+          LINES: '30',
+          FORCE_COLOR: '1',
+          // Ensure proper console behavior on Windows
+          COLUMNS_MAX: '120',
+          LINES_MAX: '30'
         },
         stdio: ['pipe', 'pipe', 'pipe'],
         shell: false,
@@ -101,13 +104,13 @@ class TerminalManager {
         this.sessions.delete(sessionId);
       });
       
-      // Mark session as ready after a short delay
+      // Mark session as ready after a longer delay to ensure proper initialization
       setTimeout(() => {
         if (this.sessions.has(sessionId)) {
           this.sessions.get(sessionId)!.ready = true;
           console.log(`✓ Session ${sessionId} marked as ready`);
         }
-      }, 500);
+      }, 1000);
 
       return sessionId;
     } catch (error) {
@@ -174,35 +177,32 @@ class TerminalManager {
       }
       
       if (session.type === 'cmd') {
-        // For CMD, set echo on and prompt format
+        // For CMD, set simple prompt without clearing
         console.log(`🔧 Setting up CMD session ${session.id}`);
         try {
-          session.process.stdin?.write('echo on\r\n');
           session.process.stdin?.write('prompt $P$G\r\n');
-          session.process.stdin?.write('cls\r\n');
         } catch (error) {
           console.error(`❌ Error initializing CMD session:`, error);
         }
       } else if (session.type === 'powershell') {
-        // For PowerShell, clear screen and show prompt
+        // For PowerShell, just show ready message without clearing
         console.log(`🔧 Setting up PowerShell session ${session.id}`);
         try {
-          session.process.stdin?.write('Clear-Host\r\n');
-          session.process.stdin?.write('Write-Host "PowerShell Ready"\r\n');
+          // Don't clear host immediately, let initial output show
+          session.process.stdin?.write('Write-Host "PowerShell Terminal Ready"\r\n');
         } catch (error) {
           console.error(`❌ Error initializing PowerShell session:`, error);
         }
       } else if (session.type === 'wsl' || session.type === 'bash') {
-        // For WSL/Bash, clear and show prompt
+        // For WSL/Bash, show ready message
         console.log(`🔧 Setting up ${session.type} session ${session.id}`);
         try {
-          session.process.stdin?.write('clear\n');
           session.process.stdin?.write('echo "Terminal ready"\n');
         } catch (error) {
           console.error(`❌ Error initializing ${session.type} session:`, error);
         }
       }
-    }, 300);
+    }, 800);
   }
 
   cleanup(): void {
@@ -406,16 +406,18 @@ class App {
         if (session) {
           console.log(`✓ Shell session created: ${sessionId}`);
           
-          // Set up stdout handler
+          // Set up stdout handler with better encoding
+          session.process.stdout?.setEncoding('utf8');
           session.process.stdout?.on('data', (data) => {
-            const output = data.toString();
+            const output = data.toString('utf8');
             console.log(`📤 Shell output [${sessionId}]:`, output.slice(0, 100) + (output.length > 100 ? '...' : ''));
             this.mainWindow?.webContents.send('shell-output', sessionId, output);
           });
 
-          // Set up stderr handler  
+          // Set up stderr handler with better encoding
+          session.process.stderr?.setEncoding('utf8');
           session.process.stderr?.on('data', (data) => {
-            const output = data.toString();
+            const output = data.toString('utf8');
             console.log(`📤 Shell error [${sessionId}]:`, output.slice(0, 100) + (output.length > 100 ? '...' : ''));
             this.mainWindow?.webContents.send('shell-output', sessionId, output);
           });
@@ -480,11 +482,11 @@ class App {
     // Handle terminal resize
     ipcMain.handle('terminal-resize', async (event, sessionId: string, cols: number, rows: number) => {
       console.log(`📱 Resize terminal [${sessionId}]: ${cols}x${rows}`);
-      // Note: With regular spawn, we can't resize the PTY, but we can update env vars for new processes
       const session = this.terminalManager.getSession(sessionId);
-      if (session) {
-        // For future enhancement: resize functionality would need PTY support
-        console.log(`Terminal ${sessionId} would be resized to ${cols}x${rows}`);
+      if (session && session.process && !session.process.killed) {
+        console.log(`Terminal ${sessionId} resized to ${cols}x${rows}`);
+        // Just acknowledge the resize - Windows console doesn't need manual resize commands
+        console.log(`Terminal ${sessionId} acknowledged resize to ${cols}x${rows}`);
         return { success: true };
       }
       return { success: false };

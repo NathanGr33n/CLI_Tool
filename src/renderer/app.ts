@@ -324,7 +324,7 @@ class TerminalApp {
       
       console.log('✓ All xterm.js classes available, creating terminal...');
       
-      // Create terminal instance
+      // Create terminal instance with improved configuration
       const terminal = new Terminal({
         theme: {
           background: '#1e1e1e',
@@ -354,7 +354,11 @@ class TerminalApp {
         cursorBlink: true,
         cursorStyle: 'block',
         scrollback: 10000,
-        tabStopWidth: 4
+        tabStopWidth: 4,
+        // Important settings for Windows shells
+        convertEol: true,
+        windowsMode: process.platform === 'win32',
+        allowProposedApi: true
       });
 
       // Add addons
