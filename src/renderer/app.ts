@@ -58,7 +58,7 @@ class TerminalApp {
   private tabs: Map<string, TabInfo> = new Map();
   private activeTabId: string | null = null;
   private tabCounter = 0;
-  private agentSidebarOpen = false;
+  private agentSidebarOpen = true; // Show AI panel by default
   
   // Circuit breaker to prevent infinite loops
   private failedTabAttempts = 0;
@@ -75,6 +75,8 @@ class TerminalApp {
       console.log('✓ Electron listeners set up');
       this.initializeAgent();
       console.log('✓ Agent initialization started');
+      this.initializeAIPanel();
+      console.log('✓ AI panel initialized');
       this.createInitialTab();
       console.log('✓ Initial tab creation started');
     } catch (error) {
@@ -374,8 +376,20 @@ class TerminalApp {
       
       console.log('✓ Terminal container element found, opening terminal...');
       
-      // Open terminal in container
+      // Open terminal in container with better error handling
+      console.log('✓ Opening terminal in container element:', terminalElement);
       terminal.open(terminalElement);
+      console.log('✓ Terminal opened successfully');
+      
+      // Verify terminal is visible
+      setTimeout(() => {
+        const terminalScreen = terminalElement.querySelector('.xterm-screen');
+        if (terminalScreen) {
+          console.log('✓ Terminal screen element found and should be visible');
+        } else {
+          console.error('❌ Terminal screen element not found - terminal may not be rendering');
+        }
+      }, 500);
       
       // Handle terminal input
       terminal.onData((data: string) => {
@@ -399,7 +413,12 @@ class TerminalApp {
           }
           // Focus terminal for immediate interaction
           terminal.focus();
-          console.log('✓ Terminal fitted and focused');
+          
+          // Force initial content display
+          terminal.write('\r\n[32mTerminal Ready - Waiting for shell connection...[0m\r\n');
+          terminal.write('Shell: ' + shellType + '\r\n');
+          
+          console.log('✓ Terminal fitted, focused, and initial content written');
         } catch (error) {
           console.error('❌ Error during terminal setup:', error);
         }
@@ -632,10 +651,10 @@ class TerminalApp {
       this.agentSidebarOpen = open !== undefined ? open : !this.agentSidebarOpen;
       
       if (this.agentSidebarOpen) {
-        sidebar.classList.add('open');
+        sidebar.classList.remove('hidden');
         toggleBtn.classList.add('active');
       } else {
-        sidebar.classList.remove('open');
+        sidebar.classList.add('hidden');
         toggleBtn.classList.remove('active');
       }
       
@@ -646,6 +665,20 @@ class TerminalApp {
     }
   }
 
+  private initializeAIPanel(): void {
+    // Set initial toggle button state
+    const toggleBtn = document.getElementById('agent-toggle-btn');
+    if (toggleBtn && this.agentSidebarOpen) {
+      toggleBtn.classList.add('active');
+    }
+    
+    // Add welcome message to AI panel
+    this.addAgentMessage('agent', 'Hello! I\'m your AI assistant. How can I help you today?');
+    this.addAgentMessage('agent', 'You can ask me about file operations, code analysis, or general development questions.');
+    
+    console.log('✓ AI panel initialized with welcome messages');
+  }
+  
   private async initializeAgent(): Promise<void> {
     if (!getElectronAPI()) {
       console.error('Electron API not available for agent initialization');

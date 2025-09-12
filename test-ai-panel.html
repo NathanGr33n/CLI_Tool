@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Panel Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1e1e1e;
+            color: #e5e5e5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .ai-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #2d2d30;
+            border: 1px solid #3e3e42;
+            color: #e5e5e5;
+            border-radius: 4px;
+        }
+        .ai-button {
+            padding: 10px 20px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .ai-button:hover {
+            background: #005a9e;
+        }
+        .messages {
+            margin-top: 20px;
+            padding: 20px;
+            background: #252526;
+            border-radius: 4px;
+            min-height: 200px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .message.user {
+            background: #007acc;
+            text-align: right;
+        }
+        .message.agent {
+            background: #2d2d30;
+            border: 1px solid #3e3e42;
+        }
+        .error {
+            color: #d13438;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>AI Panel Interaction Test</h1>
+        <p>This page tests the AI agent interaction functionality.</p>
+        
+        <div>
+            <input type="text" id="test-input" class="ai-input" placeholder="Type a message to test the AI agent..." />
+            <button id="test-send" class="ai-button">Send Test Message</button>
+            <button id="test-init" class="ai-button">Test Initialization</button>
+        </div>
+        
+        <div id="messages" class="messages">
+            <div class="message agent">AI Panel Test Ready - Click buttons to test functionality</div>
+        </div>
+    </div>
+
+    <script>
+        // Check if we're in Electron
+        function getElectronAPI() {
+            return global.electronAPI || window.electronAPI || null;
+        }
+
+        function addMessage(role, content) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${content}`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Test initialization
+        document.getElementById('test-init').addEventListener('click', async () => {
+            addMessage('user', 'Testing agent initialization...');
+            
+            const electronAPI = getElectronAPI();
+            if (!electronAPI) {
+                addMessage('agent', 'ERROR: Electron API not available');
+                return;
+            }
+            
+            try {
+                const result = await electronAPI.agentInitialize();
+                addMessage('agent', `Initialization result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                addMessage('agent', `Initialization error: ${error}`);
+            }
+        });
+
+        // Test message sending
+        document.getElementById('test-send').addEventListener('click', async () => {
+            const input = document.getElementById('test-input');
+            const message = input.value.trim();
+            
+            if (!message) {
+                addMessage('agent', 'ERROR: Please enter a message');
+                return;
+            }
+            
+            addMessage('user', message);
+            input.value = '';
+            
+            const electronAPI = getElectronAPI();
+            if (!electronAPI) {
+                addMessage('agent', 'ERROR: Electron API not available');
+                return;
+            }
+            
+            addMessage('agent', 'Sending message to agent...');
+            
+            try {
+                const response = await electronAPI.agentMessage(message);
+                addMessage('agent', `Response: ${JSON.stringify(response, null, 2)}`);
+            } catch (error) {
+                addMessage('agent', `Message error: ${error}`);
+            }
+        });
+
+        // Test enter key
+        document.getElementById('test-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('test-send').click();
+            }
+        });
+
+        // Check initial state
+        window.addEventListener('load', () => {
+            const electronAPI = getElectronAPI();
+            if (electronAPI) {
+                addMessage('agent', 'Electron API is available ✓');
+            } else {
+                addMessage('agent', 'ERROR: Electron API is not available ✗');
+            }
+        });
+    </script>
+</body>
+</html>

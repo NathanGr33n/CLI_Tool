@@ -246,11 +246,29 @@ class App {
       show: true // Show immediately for debugging
     });
 
-    // Load the HTML file (use test mode if environment variable set)
+    // Load the HTML file (check for test modes)
     const useTestMode = process.env.CLI_AGENT_TEST === 'true';
-    const htmlFile = useTestMode ? 'test-minimal.html' : 'index.html';
-    const htmlPath = path.join(__dirname, `../renderer/${htmlFile}`);
-    console.log('📄 Loading HTML file from:', htmlPath, useTestMode ? '(TEST MODE)' : '(NORMAL MODE)');
+    const useAITestMode = process.argv.includes('--test-ai');
+    
+    let htmlFile: string;
+    let htmlPath: string;
+    let mode: string;
+    
+    if (useAITestMode) {
+      htmlFile = 'test-ai-panel.html';
+      htmlPath = path.join(__dirname, '..', '..', htmlFile);
+      mode = 'AI TEST';
+    } else if (useTestMode) {
+      htmlFile = 'test-minimal.html';
+      htmlPath = path.join(__dirname, `../renderer/${htmlFile}`);
+      mode = 'TEST';
+    } else {
+      htmlFile = 'index.html';
+      htmlPath = path.join(__dirname, `../renderer/${htmlFile}`);
+      mode = 'NORMAL';
+    }
+    
+    console.log('📄 Loading HTML file from:', htmlPath, `(${mode} MODE)`);
     
     try {
       await this.mainWindow.loadFile(htmlPath);

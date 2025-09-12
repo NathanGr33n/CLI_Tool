@@ -16,6 +16,7 @@
     "start:gui-clean": "node scripts/launch-gui-clean.js",
     "start:gui-interactive": "node scripts/launch-interactive.js",
     "start:gui-super-clean": "node scripts/launch-clean.js",
+    "test:ai-panel": "node scripts/test-ai-panel.js",
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src",
