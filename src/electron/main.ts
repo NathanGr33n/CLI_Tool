@@ -230,23 +230,27 @@ class App {
       frame: true,
       titleBarStyle: 'default',
       webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
+        nodeIntegration: true,
+        contextIsolation: false,
         preload: path.join(__dirname, 'preload.js'),
         // GPU-related preferences
         offscreen: false,
         backgroundThrottling: false,
         // Security preferences
         webSecurity: false, // Allow local file access
-        allowRunningInsecureContent: true
+        allowRunningInsecureContent: true,
+        // Enable access to Node.js modules in renderer
+        nodeIntegrationInWorker: true
       },
       backgroundColor: '#1e1e1e', // Dark background
       show: true // Show immediately for debugging
     });
 
-    // Load the HTML file
-    const htmlPath = path.join(__dirname, '../renderer/index.html');
-    console.log('📄 Loading HTML file from:', htmlPath);
+    // Load the HTML file (use test mode if environment variable set)
+    const useTestMode = process.env.CLI_AGENT_TEST === 'true';
+    const htmlFile = useTestMode ? 'test-minimal.html' : 'index.html';
+    const htmlPath = path.join(__dirname, `../renderer/${htmlFile}`);
+    console.log('📄 Loading HTML file from:', htmlPath, useTestMode ? '(TEST MODE)' : '(NORMAL MODE)');
     
     try {
       await this.mainWindow.loadFile(htmlPath);

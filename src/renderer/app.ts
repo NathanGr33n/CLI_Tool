@@ -1,31 +1,46 @@
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
+// Import xterm.js using Node.js require (now possible with nodeIntegration: true)
+let Terminal: any, FitAddon: any, WebLinksAddon: any;
 
-// Declare the global electronAPI interface
-declare global {
-  interface Window {
-    electronAPI: {
-      createShellSession: (type: string) => Promise<{ success: boolean; sessionId?: string; title?: string; error?: string }>;
-      shellInput: (sessionId: string, data: string) => Promise<{ success: boolean }>;
-      killShellSession: (sessionId: string) => Promise<{ success: boolean }>;
-      onShellOutput: (callback: (sessionId: string, data: string) => void) => void;
-      onShellExit: (callback: (sessionId: string, exitCode: number) => void) => void;
-      onMenuNewTab: (callback: () => void) => void;
-      onMenuCloseTab: (callback: () => void) => void;
-      onMenuNewShellTab: (callback: (shellType: string) => void) => void;
-      removeAllListeners: () => void;
-      closeApp: () => Promise<void>;
-      
-      // Agent functionality
-      agentInitialize: (workingDirectory?: string) => Promise<{ success: boolean; error?: string }>;
-      agentMessage: (message: string) => Promise<any>;
-      agentExecuteActions: (actionIds: string[]) => Promise<any[]>;
-      agentAnalyzeProject: () => Promise<any>;
-      agentGetCapabilities: () => Promise<string[]>;
-      terminalResize: (sessionId: string, cols: number, rows: number) => Promise<{ success: boolean }>;
-    };
-  }
+try {
+  const xterm = require('@xterm/xterm');
+  Terminal = xterm.Terminal;
+  
+  const fitAddon = require('@xterm/addon-fit');
+  FitAddon = fitAddon.FitAddon;
+  
+  const webLinksAddon = require('@xterm/addon-web-links');
+  WebLinksAddon = webLinksAddon.WebLinksAddon;
+  
+  console.log('✓ xterm.js modules loaded successfully');
+} catch (error) {
+  console.error('❌ Failed to load xterm.js modules:', error);
+}
+
+// Declare the electronAPI interface
+interface ElectronAPI {
+  createShellSession: (type: string) => Promise<{ success: boolean; sessionId?: string; title?: string; error?: string }>;
+  shellInput: (sessionId: string, data: string) => Promise<{ success: boolean }>;
+  killShellSession: (sessionId: string) => Promise<{ success: boolean }>;
+  onShellOutput: (callback: (sessionId: string, data: string) => void) => void;
+  onShellExit: (callback: (sessionId: string, exitCode: number) => void) => void;
+  onMenuNewTab: (callback: () => void) => void;
+  onMenuCloseTab: (callback: () => void) => void;
+  onMenuNewShellTab: (callback: (shellType: string) => void) => void;
+  removeAllListeners: () => void;
+  closeApp: () => Promise<void>;
+  
+  // Agent functionality
+  agentInitialize: (workingDirectory?: string) => Promise<{ success: boolean; error?: string }>;
+  agentMessage: (message: string) => Promise<any>;
+  agentExecuteActions: (actionIds: string[]) => Promise<any[]>;
+  agentAnalyzeProject: () => Promise<any>;
+  agentGetCapabilities: () => Promise<string[]>;
+  terminalResize: (sessionId: string, cols: number, rows: number) => Promise<{ success: boolean }>;
+}
+
+// Access electronAPI from global scope
+function getElectronAPI(): ElectronAPI | null {
+  return (global as any).electronAPI || (window as any).electronAPI || null;
 }
 
 interface TabInfo {
@@ -34,9 +49,9 @@ interface TabInfo {
   title: string;
   shellType: string;
   element: HTMLElement;
-  terminal: Terminal | null;
+  terminal: any;
   terminalContainer: HTMLElement;
-  fitAddon: FitAddon | null;
+  fitAddon: any;
 }
 
 class TerminalApp {
@@ -44,6 +59,12 @@ class TerminalApp {
   private activeTabId: string | null = null;
   private tabCounter = 0;
   private agentSidebarOpen = false;
+  
+  // Circuit breaker to prevent infinite loops
+  private failedTabAttempts = 0;
+  private maxFailedAttempts = 3;
+  private lastFailedAttemptTime = 0;
+  private circuitBreakerResetTime = 30000; // 30 seconds
 
   constructor() {
     console.log('🏠 TerminalApp constructor called');
@@ -144,7 +165,8 @@ class TerminalApp {
   }
 
   private setupElectronListeners(): void {
-    if (!window.electronAPI) {
+    const electronAPI = getElectronAPI();
+    if (!electronAPI) {
       console.error('❌ Electron API not available');
       return;
     }
@@ -152,47 +174,101 @@ class TerminalApp {
     console.log('✓ Electron API available, setting up listeners...');
 
     // Handle shell output
-    window.electronAPI.onShellOutput((sessionId: string, data: string) => {
+    electronAPI.onShellOutput((sessionId: string, data: string) => {
       this.handleShellOutput(sessionId, data);
     });
 
     // Handle shell exit
-    window.electronAPI.onShellExit((sessionId: string, exitCode: number) => {
+    electronAPI.onShellExit((sessionId: string, exitCode: number) => {
       this.handleShellExit(sessionId, exitCode);
     });
 
     // Handle menu commands
-    window.electronAPI.onMenuNewTab(() => {
+    electronAPI.onMenuNewTab(() => {
       this.createTab('powershell');
     });
 
-    window.electronAPI.onMenuCloseTab(() => {
+    electronAPI.onMenuCloseTab(() => {
       if (this.activeTabId) {
         this.closeTab(this.activeTabId);
       }
     });
 
-    window.electronAPI.onMenuNewShellTab((shellType: string) => {
+    electronAPI.onMenuNewShellTab((shellType: string) => {
       this.createTab(shellType);
     });
   }
 
+  private tabCreationInProgress = false;
+  
+  private isCircuitBreakerOpen(): boolean {
+    const now = Date.now();
+    if (this.failedTabAttempts >= this.maxFailedAttempts) {
+      if (now - this.lastFailedAttemptTime > this.circuitBreakerResetTime) {
+        // Reset circuit breaker after timeout
+        console.log('🔄 Circuit breaker reset after timeout');
+        this.failedTabAttempts = 0;
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+  
+  private recordTabCreationFailure(): void {
+    this.failedTabAttempts++;
+    this.lastFailedAttemptTime = Date.now();
+    console.warn(`⚠️ Tab creation failure #${this.failedTabAttempts}/${this.maxFailedAttempts}`);
+  }
+  
+  private recordTabCreationSuccess(): void {
+    this.failedTabAttempts = 0;
+    console.log('✓ Tab creation successful, circuit breaker reset');
+  }
+  
   private async createInitialTab(): Promise<void> {
     console.log('🎯 Starting initial tab creation...');
+    
+    // Check circuit breaker
+    if (this.isCircuitBreakerOpen()) {
+      console.error('❌ Circuit breaker open - too many failed tab creation attempts');
+      this.showError('Terminal creation temporarily disabled due to repeated failures. Please refresh the page to try again.');
+      return;
+    }
+    
+    // Prevent multiple simultaneous tab creation attempts
+    if (this.tabCreationInProgress) {
+      console.log('⚠️ Tab creation already in progress, skipping...');
+      return;
+    }
+    
+    this.tabCreationInProgress = true;
+    
     try {
       await this.createTab('powershell');
       console.log('✓ Initial tab created successfully');
+      this.recordTabCreationSuccess();
     } catch (error) {
       console.error('❌ Failed to create initial tab:', error);
-      // Try to create a fallback tab with cmd if powershell fails
-      try {
-        console.log('🔄 Trying fallback CMD tab...');
-        await this.createTab('cmd');
-        console.log('✓ Fallback CMD tab created successfully');
-      } catch (fallbackError) {
-        console.error('❌ Fallback tab creation also failed:', fallbackError);
-        this.showError('Failed to create any terminal session. Please check that PowerShell or CMD are available on your system.');
+      this.recordTabCreationFailure();
+      
+      // Only try fallback once, and only if we don't have any tabs yet and circuit breaker allows
+      if (this.tabs.size === 0 && !this.isCircuitBreakerOpen()) {
+        try {
+          console.log('🔄 Trying fallback CMD tab...');
+          await this.createTab('cmd');
+          console.log('✓ Fallback CMD tab created successfully');
+          this.recordTabCreationSuccess();
+        } catch (fallbackError) {
+          console.error('❌ Fallback tab creation also failed:', fallbackError);
+          this.recordTabCreationFailure();
+          this.showError('Failed to create any terminal session. Please check that PowerShell or CMD are available on your system.');
+        }
+      } else if (this.tabs.size > 0) {
+        console.log('✓ Tab creation failed but we have existing tabs, continuing...');
       }
+    } finally {
+      this.tabCreationInProgress = false;
     }
   }
 
@@ -204,10 +280,19 @@ class TerminalApp {
     const tabId = this.generateTabId();
     console.log(`🆕 Creating new tab: ${tabId} (${shellType})`);
     
+    // Check if we're in circuit breaker mode
+    if (this.isCircuitBreakerOpen()) {
+      throw new Error('Circuit breaker is open - too many failed attempts');
+    }
+    
     try {
       // Create shell session
       console.log(`🔧 Requesting shell session for ${shellType}...`);
-      const sessionResult = await window.electronAPI.createShellSession(shellType);
+      const electronAPI = getElectronAPI();
+      if (!electronAPI) {
+        throw new Error('Electron API not available');
+      }
+      const sessionResult = await electronAPI.createShellSession(shellType);
       console.log('📊 Shell session result:', sessionResult);
       
       if (!sessionResult.success) {
@@ -224,6 +309,21 @@ class TerminalApp {
       // Create terminal container
       const terminalContainer = this.createTerminalContainer(tabId);
 
+      // Validate that Terminal class is available
+      if (typeof Terminal === 'undefined') {
+        throw new Error('Terminal class not available - xterm.js not loaded properly');
+      }
+      
+      if (typeof FitAddon === 'undefined') {
+        throw new Error('FitAddon class not available - addon-fit.js not loaded properly');
+      }
+      
+      if (typeof WebLinksAddon === 'undefined') {
+        throw new Error('WebLinksAddon class not available - addon-web-links.js not loaded properly');
+      }
+      
+      console.log('✓ All xterm.js classes available, creating terminal...');
+      
       // Create terminal instance
       const terminal = new Terminal({
         theme: {
@@ -262,13 +362,24 @@ class TerminalApp {
       terminal.loadAddon(fitAddon);
       terminal.loadAddon(new WebLinksAddon());
 
+      // Validate terminal container
+      const terminalElement = terminalContainer.querySelector('.terminal-instance') as HTMLElement;
+      if (!terminalElement) {
+        throw new Error('Terminal container element not found');
+      }
+      
+      console.log('✓ Terminal container element found, opening terminal...');
+      
       // Open terminal in container
-      terminal.open(terminalContainer.querySelector('.terminal-instance') as HTMLElement);
+      terminal.open(terminalElement);
       
       // Handle terminal input
-      terminal.onData((data) => {
+      terminal.onData((data: string) => {
         console.log(`📥 Terminal input for ${sessionId}:`, JSON.stringify(data));
-        window.electronAPI.shellInput(sessionId, data);
+        const electronAPI = getElectronAPI();
+        if (electronAPI) {
+          electronAPI.shellInput(sessionId, data);
+        }
       });
 
       // Fit terminal to container and handle resize
@@ -278,7 +389,10 @@ class TerminalApp {
           // Send resize information to backend
           const { cols, rows } = terminal;
           console.log(`📱 Terminal sized to ${cols}x${rows}`);
-          window.electronAPI.terminalResize(sessionId, cols, rows);
+          const electronAPI = getElectronAPI();
+          if (electronAPI) {
+            electronAPI.terminalResize(sessionId, cols, rows);
+          }
           // Focus terminal for immediate interaction
           terminal.focus();
           console.log('✓ Terminal fitted and focused');
@@ -288,9 +402,12 @@ class TerminalApp {
       }, 200);
       
       // Handle terminal resize events
-      terminal.onResize(({ cols, rows }) => {
+      terminal.onResize(({ cols, rows }: { cols: number, rows: number }) => {
         console.log(`📱 Terminal resized: ${cols}x${rows}`);
-        window.electronAPI.terminalResize(sessionId, cols, rows);
+        const electronAPI = getElectronAPI();
+        if (electronAPI) {
+          electronAPI.terminalResize(sessionId, cols, rows);
+        }
       });
 
       // Store tab info
@@ -315,13 +432,21 @@ class TerminalApp {
 
     } catch (error) {
       console.error(`❌ Failed to create ${shellType} tab:`, error);
-      this.showError(`Failed to create ${shellType} tab: ${(error as Error).message || error}`);
-      // Don't let a single tab failure crash the whole app
-      if (this.tabs.size === 0) {
-        console.warn('⚠️  No tabs available, trying to create a basic terminal...');
-        // If this was our only/first tab, try a different approach
-        setTimeout(() => this.createInitialTab(), 1000);
+      this.recordTabCreationFailure();
+      
+      // Don't show error if circuit breaker is open (already shown)
+      if (!this.isCircuitBreakerOpen()) {
+        this.showError(`Failed to create ${shellType} tab: ${(error as Error).message || error}`);
       }
+      
+      // Don't retry if circuit breaker is open
+      if (this.tabs.size === 0 && !this.isCircuitBreakerOpen()) {
+        console.warn('⚠️  No tabs available and circuit breaker allows retry...');
+        // Don't retry automatically to prevent loops - user can refresh instead
+      }
+      
+      // Re-throw error to be handled by caller
+      throw error;
     }
   }
 
@@ -403,7 +528,10 @@ class TerminalApp {
     try {
       // Kill shell session
       if (tab.sessionId) {
-        await window.electronAPI.killShellSession(tab.sessionId);
+        const electronAPI = getElectronAPI();
+        if (electronAPI) {
+          await electronAPI.killShellSession(tab.sessionId);
+        }
       }
 
       // Dispose terminal
@@ -480,7 +608,10 @@ class TerminalApp {
         // Notify backend of resize if session exists
         if (activeTab.sessionId) {
           const { cols, rows } = activeTab.terminal!;
-          window.electronAPI.terminalResize(activeTab.sessionId, cols, rows);
+          const electronAPI = getElectronAPI();
+          if (electronAPI) {
+            electronAPI.terminalResize(activeTab.sessionId, cols, rows);
+          }
         }
         
         // Refocus terminal after resize
@@ -512,13 +643,17 @@ class TerminalApp {
   }
 
   private async initializeAgent(): Promise<void> {
-    if (!window.electronAPI) {
+    if (!getElectronAPI()) {
       console.error('Electron API not available for agent initialization');
       return;
     }
 
     try {
-      const result = await window.electronAPI.agentInitialize();
+      const electronAPI = getElectronAPI();
+      if (!electronAPI) {
+        throw new Error('Electron API not available for agent initialization');
+      }
+      const result = await electronAPI.agentInitialize();
       if (result.success) {
         console.log('Agent initialized successfully');
       } else {
@@ -541,7 +676,11 @@ class TerminalApp {
 
     try {
       // Use the real agent
-      const response = await window.electronAPI.agentMessage(message);
+      const electronAPI = getElectronAPI();
+      if (!electronAPI) {
+        throw new Error('Electron API not available for agent message');
+      }
+      const response = await electronAPI.agentMessage(message);
       
       this.removeAgentMessage(loadingId);
       
@@ -651,26 +790,72 @@ class TerminalApp {
     }
     
     // Also show in console for debugging
-    if (window.electronAPI) {
+    if (getElectronAPI()) {
       // Could add notification system here later
     }
   }
 }
 
+// Prevent multiple initialization
+let appInitialized = false;
+
 // Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+function initializeApp() {
+  if (appInitialized) {
+    console.log('⚠️ App already initialized, skipping...');
+    return;
+  }
+  appInitialized = true;
+  
   console.log('🎯 DOM Content Loaded - Initializing Terminal App...');
+  
+  // Check if required libraries are available
+  console.log('Checking required libraries:');
+  console.log('- Terminal available:', typeof Terminal !== 'undefined');
+  console.log('- FitAddon available:', typeof FitAddon !== 'undefined');
+  console.log('- WebLinksAddon available:', typeof WebLinksAddon !== 'undefined');
+  console.log('- electronAPI available:', !!getElectronAPI());
+  
+  if (typeof Terminal === 'undefined') {
+    console.error('❌ Terminal (xterm.js) not available - check if xterm.js loaded');
+    document.body.innerHTML = `
+      <div style="color: red; padding: 20px; font-family: monospace;">
+        <h2>Error: Terminal Library Not Available</h2>
+        <p>The xterm.js library failed to load. Please check your internet connection or refresh the page.</p>
+      </div>
+    `;
+    return;
+  }
+  
   try {
     new TerminalApp();
     console.log('✓ Terminal App initialized successfully');
   } catch (error) {
     console.error('❌ Failed to initialize Terminal App:', error);
+    document.body.innerHTML = `
+      <div style="color: red; padding: 20px; font-family: monospace;">
+        <h2>Terminal App Initialization Error</h2>
+        <p>${error}</p>
+        <button onclick="window.location.reload()">Reload</button>
+      </div>
+    `;
   }
-});
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  // DOM is already ready
+  setTimeout(initializeApp, 100);
+}
 
 // Handle app cleanup
 window.addEventListener('beforeunload', () => {
-  if (window.electronAPI) {
-    window.electronAPI.removeAllListeners();
+  if (getElectronAPI()) {
+    const electronAPI = getElectronAPI();
+    if (electronAPI) {
+      electronAPI.removeAllListeners();
+    }
   }
 });

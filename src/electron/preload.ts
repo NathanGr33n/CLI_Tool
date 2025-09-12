@@ -81,16 +81,12 @@ const electronAPI: ElectronAPI = {
   terminalResize: (sessionId: string, cols: number, rows: number) => ipcRenderer.invoke('terminal-resize', sessionId, cols, rows)
 };
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electronAPI', electronAPI);
-  } catch (error) {
-    console.error('Failed to expose electronAPI to main world:', error);
-  }
-} else {
-  // Fallback for when context isolation is disabled
+// With nodeIntegration enabled and contextIsolation disabled,
+// we can directly expose the API to the global scope
+try {
+  (global as any).electronAPI = electronAPI;
   (window as any).electronAPI = electronAPI;
+  console.log('✓ electronAPI exposed to global scope');
+} catch (error) {
+  console.error('❌ Failed to expose electronAPI:', error);
 }
