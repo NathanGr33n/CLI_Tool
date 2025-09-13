@@ -268,22 +268,23 @@ body {
   background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Agent sidebar */
+/* Agent sidebar - positioned on far right */
 .agent-sidebar {
-  width: 350px;
+  width: 400px; /* Slightly wider for better visibility */
   background: var(--bg-secondary);
-  border-left: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-blue); /* Thicker blue border for prominence */
   display: flex;
   flex-direction: column;
   transform: translateX(0); /* Show by default */
-  transition: transform 0.3s ease;
-  position: relative; /* Changed from absolute */
+  transition: all 0.3s ease;
+  position: relative;
   min-height: 100%;
   z-index: 1000;
   flex-shrink: 0; /* Prevent shrinking */
-  /* Add subtle glow to make it more noticeable */
-  border-left: 2px solid var(--accent-blue);
-  box-shadow: -2px 0 8px rgba(0, 122, 204, 0.1);
+  /* Enhanced styling for far right positioning */
+  box-shadow: -4px 0 12px rgba(0, 122, 204, 0.15), -2px 0 6px rgba(0, 0, 0, 0.1);
+  /* Add gradient background for better distinction */
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, #2a2a2d 100%);
 }
 
 .agent-sidebar.hidden {
@@ -293,21 +294,23 @@ body {
 }
 
 .sidebar-header {
-  height: 48px;
-  padding: 0 16px;
+  height: 52px; /* Slightly taller for better presence */
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
-  /* Add visual emphasis */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid var(--accent-blue);
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #323236 100%);
+  /* Enhanced visual emphasis for far right positioning */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 122, 204, 0.2);
 }
 
 .sidebar-header h3 {
-  font-size: 14px;
+  font-size: 16px; /* Larger font for better visibility */
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 700; /* Bolder weight */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px; /* Slightly spaced out */
 }
 
 .close-sidebar-btn {

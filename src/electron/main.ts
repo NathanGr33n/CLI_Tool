@@ -14,6 +14,8 @@ interface ShellSession {
   process: ChildProcess;
   title: string;
   ready: boolean;
+  lineBuffer: string;
+  cursorPosition: number;
 }
 
 class TerminalManager {
@@ -32,7 +34,7 @@ class TerminalManager {
     switch (type) {
       case 'powershell':
         shellCommand = 'powershell.exe';
-        shellArgs = ['-NoLogo', '-NoExit'];
+        shellArgs = ['-NoLogo', '-NoExit', '-NoProfile'];
         title = 'PowerShell';
         break;
       case 'cmd':
@@ -66,9 +68,11 @@ class TerminalManager {
           COLUMNS: '120',
           LINES: '30',
           FORCE_COLOR: '1',
-          // Ensure proper console behavior on Windows
-          COLUMNS_MAX: '120',
-          LINES_MAX: '30'
+          // Windows-specific environment for better terminal behavior
+          PROMPT: '$P$G', // Simple prompt for CMD
+          // PowerShell-specific settings
+          PSReadLineOption_BellStyle: 'None',
+          PSReadLineOption_EditMode: 'Emacs'
         },
         stdio: ['pipe', 'pipe', 'pipe'],
         shell: false,
@@ -88,7 +92,9 @@ class TerminalManager {
         type,
         process: childProcess,
         title,
-        ready: false
+        ready: false,
+        lineBuffer: '',
+        cursorPosition: 0
       };
 
       this.sessions.set(sessionId, session);
@@ -136,18 +142,69 @@ class TerminalManager {
     }
     
     try {
-      // Handle special characters
+      // Log the input data for debugging
+      console.log(`🔢 Shell input [${sessionId}]:`, JSON.stringify(data), `(codes: ${Array.from(data).map(c => c.charCodeAt(0)).join(',')})`);
+      
+      // Handle special characters with line buffering for proper backspace support
       if (data === '\r') {
-        // Convert carriage return to newline for shells
-        session.process.stdin.write('\n');
+        // Enter key - send buffered line to shell
+        console.log(`🔄 Sending complete line to ${session.type}:`, JSON.stringify(session.lineBuffer));
+        session.process.stdin.write(session.lineBuffer + '\r\n');
+        // Reset line buffer
+        session.lineBuffer = '';
+        session.cursorPosition = 0;
       } else if (data === '\u0003') {
         // Handle Ctrl+C (SIGINT)
+        console.log(`🛑 Sending SIGINT to ${session.type}`);
         session.process.kill('SIGINT');
+        // Clear line buffer
+        session.lineBuffer = '';
+        session.cursorPosition = 0;
       } else if (data === '\u0004') {
         // Handle Ctrl+D (EOF)
+        console.log(`🔚 Ending stdin for ${session.type}`);
         session.process.stdin.end();
+      } else if (data === '\u0008' || data === '\u007f') {
+        // Handle Backspace - implement local echo with backspace
+        if (session.lineBuffer.length > 0 && session.cursorPosition > 0) {
+          console.log(`⌫ Backspace - removing character at position ${session.cursorPosition - 1}`);
+          // Remove character from buffer
+          session.lineBuffer = session.lineBuffer.slice(0, session.cursorPosition - 1) + 
+                               session.lineBuffer.slice(session.cursorPosition);
+          session.cursorPosition--;
+          
+          // Send backspace sequence to terminal for visual feedback
+          console.log(`📡 Sending backspace visual feedback`);
+          this.sendToRenderer(sessionId, '\b \b');  // backspace, space, backspace
+        } else {
+          console.log(`⚠️ Backspace ignored - at beginning of line`);
+        }
+      } else if (data === '\u001b') {
+        // Handle Escape sequences (arrow keys, etc.)
+        console.log(`🔄 Sending escape sequence to ${session.type}`);
+        session.process.stdin.write(data);
+      } else if (data.startsWith('\u001b[')) {
+        // Handle ANSI escape sequences (arrow keys, function keys, etc.)
+        console.log(`📡 Sending ANSI escape sequence to ${session.type}:`, data);
+        session.process.stdin.write(data);
+      } else if (data === '\t') {
+        // Handle Tab for autocompletion - send current buffer + tab
+        console.log(`📋 Sending tab completion for:`, JSON.stringify(session.lineBuffer));
+        session.process.stdin.write(session.lineBuffer + '\t');
+      } else if (data.length === 1 && data.charCodeAt(0) >= 32 && data.charCodeAt(0) < 127) {
+        // Regular printable characters - add to line buffer
+        session.lineBuffer = session.lineBuffer.slice(0, session.cursorPosition) + 
+                           data + 
+                           session.lineBuffer.slice(session.cursorPosition);
+        session.cursorPosition++;
+        console.log(`📝 Added character to buffer:`, JSON.stringify(session.lineBuffer), `cursor at ${session.cursorPosition}`);
+        
+        // Send character to terminal for visual feedback
+        this.sendToRenderer(sessionId, data);
       } else {
-        session.process.stdin.write(data, 'utf8');
+        // Other characters - send directly to process
+        console.log(`🔄 Sending other character directly to ${session.type}`);
+        session.process.stdin.write(data);
       }
       return true;
     } catch (error) {
@@ -205,6 +262,14 @@ class TerminalManager {
     }, 800);
   }
 
+  sendToRenderer(sessionId: string, data: string): void {
+    // Send data directly to the renderer for visual feedback
+    const mainWindow = (global as any).mainWindow;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('shell-output', sessionId, data);
+    }
+  }
+
   cleanup(): void {
     for (const [sessionId, session] of this.sessions) {
       session.process.kill();
@@ -245,6 +310,9 @@ class App {
       backgroundColor: '#1e1e1e', // Dark background
       show: true // Show immediately for debugging
     });
+    
+    // Store global reference for terminal manager
+    (global as any).mainWindow = this.mainWindow;
 
     // Load the HTML file (check for test modes)
     const useTestMode = process.env.CLI_AGENT_TEST === 'true';

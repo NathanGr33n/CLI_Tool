@@ -89,7 +89,7 @@ class TerminalApp {
     // New tab button
     const newTabBtn = document.getElementById('new-tab-btn');
     newTabBtn?.addEventListener('click', () => {
-      this.createTab('powershell');
+      this.createTab('cmd');
     });
 
     // Shell selector buttons
@@ -153,7 +153,7 @@ class TerminalApp {
         switch (e.key) {
           case 't':
             e.preventDefault();
-            this.createTab('powershell');
+            this.createTab('cmd');
             break;
           case 'w':
             e.preventDefault();
@@ -187,7 +187,7 @@ class TerminalApp {
 
     // Handle menu commands
     electronAPI.onMenuNewTab(() => {
-      this.createTab('powershell');
+      this.createTab('cmd');
     });
 
     electronAPI.onMenuCloseTab(() => {
@@ -247,7 +247,7 @@ class TerminalApp {
     this.tabCreationInProgress = true;
     
     try {
-      await this.createTab('powershell');
+      await this.createTab('cmd');
       console.log('✓ Initial tab created successfully');
       this.recordTabCreationSuccess();
     } catch (error) {
@@ -257,14 +257,14 @@ class TerminalApp {
       // Only try fallback once, and only if we don't have any tabs yet and circuit breaker allows
       if (this.tabs.size === 0 && !this.isCircuitBreakerOpen()) {
         try {
-          console.log('🔄 Trying fallback CMD tab...');
-          await this.createTab('cmd');
-          console.log('✓ Fallback CMD tab created successfully');
+          console.log('🔄 Trying fallback PowerShell tab...');
+          await this.createTab('powershell');
+          console.log('✓ Fallback PowerShell tab created successfully');
           this.recordTabCreationSuccess();
         } catch (fallbackError) {
           console.error('❌ Fallback tab creation also failed:', fallbackError);
           this.recordTabCreationFailure();
-          this.showError('Failed to create any terminal session. Please check that PowerShell or CMD are available on your system.');
+          this.showError('Failed to create any terminal session. Please check that CMD or PowerShell are available on your system.');
         }
       } else if (this.tabs.size > 0) {
         console.log('✓ Tab creation failed but we have existing tabs, continuing...');
@@ -326,7 +326,7 @@ class TerminalApp {
       
       console.log('✓ All xterm.js classes available, creating terminal...');
       
-      // Create terminal instance with improved configuration
+      // Create terminal instance with improved configuration for better keyboard support
       const terminal = new Terminal({
         theme: {
           background: '#1e1e1e',
@@ -357,10 +357,19 @@ class TerminalApp {
         cursorStyle: 'block',
         scrollback: 10000,
         tabStopWidth: 4,
-        // Important settings for Windows shells
+        // Enhanced settings for Windows shell compatibility
         convertEol: true,
-        windowsMode: process.platform === 'win32',
-        allowProposedApi: true
+        windowsMode: true,  // Force Windows mode regardless of platform
+        allowProposedApi: true,
+        // Better keyboard handling
+        altClickMovesCursor: false,
+        macOptionIsMeta: false,
+        rightClickSelectsWord: false,
+        // Improved terminal behavior
+        bellStyle: 'none',
+        disableStdin: false,
+        screenKeys: true,
+        useFlowControl: false
       });
 
       // Add addons
