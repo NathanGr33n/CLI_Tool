@@ -308,7 +308,7 @@ class App {
         nodeIntegrationInWorker: true
       },
       backgroundColor: '#1e1e1e', // Dark background
-      show: true // Show immediately for debugging
+      show: false // Wait for ready-to-show event
     });
     
     // Store global reference for terminal manager
@@ -350,11 +350,10 @@ class App {
       console.log('📺 Window ready to show');
       this.mainWindow?.show();
       
-      // Focus the window and open dev tools for debugging
+      // Focus the window
       if (this.mainWindow) {
         this.mainWindow.focus();
-        this.mainWindow.webContents.openDevTools();
-        console.log('✓ Window shown, focused, and dev tools opened');
+        console.log('✓ Window shown and focused');
       }
     });
     
