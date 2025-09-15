@@ -28,6 +28,14 @@ interface ElectronAPI {
   agentGetCapabilities: () => Promise<string[]>;
   agentChangeDirectory: (newPath: string) => Promise<{ success: boolean }>;
   terminalResize: (sessionId: string, cols: number, rows: number) => Promise<{ success: boolean }>;
+  
+  // Transparency controls
+  setWindowTransparency: (opacity: number) => Promise<{ success: boolean; opacity?: number; error?: string }>;
+  getWindowTransparency: () => Promise<{ success: boolean; opacity?: number; error?: string }>;
+  applyTheme: (terminalOptions: any) => Promise<{ success: boolean }>;
+  
+  // General invoke method for flexibility
+  invoke: (channel: string, ...args: any[]) => Promise<any>;
 }
 
 // Expose protected methods that allow the renderer process to use
@@ -78,7 +86,15 @@ const electronAPI: ElectronAPI = {
   agentAnalyzeProject: () => ipcRenderer.invoke('agent-analyze-project'),
   agentGetCapabilities: () => ipcRenderer.invoke('agent-get-capabilities'),
   agentChangeDirectory: (newPath: string) => ipcRenderer.invoke('agent-change-directory', newPath),
-  terminalResize: (sessionId: string, cols: number, rows: number) => ipcRenderer.invoke('terminal-resize', sessionId, cols, rows)
+  terminalResize: (sessionId: string, cols: number, rows: number) => ipcRenderer.invoke('terminal-resize', sessionId, cols, rows),
+  
+  // Transparency controls
+  setWindowTransparency: (opacity: number) => ipcRenderer.invoke('set-window-transparency', opacity),
+  getWindowTransparency: () => ipcRenderer.invoke('get-window-transparency'),
+  applyTheme: (terminalOptions: any) => ipcRenderer.invoke('apply-theme', terminalOptions),
+  
+  // General invoke method for flexibility
+  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args)
 };
 
 // With nodeIntegration enabled and contextIsolation disabled,

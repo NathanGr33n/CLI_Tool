@@ -30,6 +30,13 @@ export interface Theme {
     buttonBg: string;
     buttonHover: string;
   };
+  transparency?: {
+    windowOpacity: number;
+    terminalOpacity: number;
+    sidebarOpacity: number;
+    tabOpacity: number;
+    enabled: boolean;
+  };
 }
 
 export const themes: Record<string, Theme> = {
@@ -64,6 +71,13 @@ export const themes: Record<string, Theme> = {
       borderColor: '#3e3e42',
       buttonBg: '#0e639c',
       buttonHover: '#1177bb'
+    },
+    transparency: {
+      windowOpacity: 0.95,
+      terminalOpacity: 0.9,
+      sidebarOpacity: 0.85,
+      tabOpacity: 0.9,
+      enabled: true
     }
   },
   dracula: {
@@ -97,6 +111,13 @@ export const themes: Record<string, Theme> = {
       borderColor: '#6272a4',
       buttonBg: '#bd93f9',
       buttonHover: '#d6acff'
+    },
+    transparency: {
+      windowOpacity: 0.92,
+      terminalOpacity: 0.88,
+      sidebarOpacity: 0.82,
+      tabOpacity: 0.87,
+      enabled: true
     }
   },
   monokai: {
@@ -130,21 +151,34 @@ export const themes: Record<string, Theme> = {
       borderColor: '#49483e',
       buttonBg: '#66d9ef',
       buttonHover: '#a1efe4'
+    },
+    transparency: {
+      windowOpacity: 0.93,
+      terminalOpacity: 0.86,
+      sidebarOpacity: 0.8,
+      tabOpacity: 0.85,
+      enabled: true
     }
   }
 };
 
 export class ThemeManager {
   private currentTheme: string = 'dark';
+  private transparencyManager: any = null; // Will be set externally
   
   constructor() {
     this.loadTheme();
+  }
+  
+  setTransparencyManager(transparencyManager: any): void {
+    this.transparencyManager = transparencyManager;
   }
   
   setTheme(themeName: string): void {
     if (themes[themeName]) {
       this.currentTheme = themeName;
       this.applyTheme(themes[themeName]);
+      this.applyTransparency(themes[themeName]);
       this.saveTheme();
     }
   }
@@ -188,6 +222,16 @@ export class ThemeManager {
     const saved = localStorage.getItem('selected-theme');
     if (saved && themes[saved]) {
       this.setTheme(saved);
+    }
+  }
+  
+  private applyTransparency(theme: Theme): void {
+    if (this.transparencyManager && theme.transparency) {
+      this.transparencyManager.setWindowOpacity(theme.transparency.windowOpacity);
+      this.transparencyManager.setTerminalOpacity(theme.transparency.terminalOpacity);
+      this.transparencyManager.setSidebarOpacity(theme.transparency.sidebarOpacity);
+      this.transparencyManager.setTabOpacity(theme.transparency.tabOpacity);
+      this.transparencyManager.setEnabled(theme.transparency.enabled);
     }
   }
 }

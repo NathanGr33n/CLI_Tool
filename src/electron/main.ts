@@ -294,6 +294,7 @@ class App {
       minHeight: 600,
       frame: true,
       titleBarStyle: 'default',
+      transparent: true, // Enable transparency
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
@@ -307,7 +308,7 @@ class App {
         // Enable access to Node.js modules in renderer
         nodeIntegrationInWorker: true
       },
-      backgroundColor: '#1e1e1e', // Dark background
+      backgroundColor: '#00000000', // Fully transparent background
       show: true // Show immediately for debugging
     });
     
@@ -612,6 +613,34 @@ class App {
     ipcMain.handle('agent-change-directory', async (event, newPath: string) => {
       const success = await this.agentAdapter.changeDirectory(newPath);
       return { success };
+    });
+
+    // Transparency handlers
+    ipcMain.handle('set-window-transparency', async (event, opacity: number) => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        // Clamp opacity between 0.1 and 1.0
+        const clampedOpacity = Math.max(0.1, Math.min(1.0, opacity));
+        this.mainWindow.setOpacity(clampedOpacity);
+        console.log(`🎨 Window opacity set to: ${clampedOpacity}`);
+        return { success: true, opacity: clampedOpacity };
+      }
+      return { success: false, error: 'Window not available' };
+    });
+
+    ipcMain.handle('get-window-transparency', async () => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        const opacity = this.mainWindow.getOpacity();
+        return { success: true, opacity };
+      }
+      return { success: false, error: 'Window not available' };
+    });
+
+    ipcMain.handle('apply-theme', async (event, terminalOptions: any) => {
+      // Handle theme changes for terminals
+      console.log('🎨 Applying theme to terminals:', terminalOptions);
+      // This will be handled by the renderer process
+      this.mainWindow?.webContents.send('theme-updated', terminalOptions);
+      return { success: true };
     });
   }
 
