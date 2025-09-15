@@ -198,7 +198,7 @@ export class ThemeManager {
     };
     
     // Notify all terminals to update their theme
-    getElectronAPI()?.invoke('apply-theme', terminalOptions);
+    getElectronAPI()?.send('apply-theme', terminalOptions);
     
     // Apply UI theme
     this.applyUITheme(theme.ui);
