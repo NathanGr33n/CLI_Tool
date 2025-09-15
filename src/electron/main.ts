@@ -641,6 +641,178 @@ class App {
       this.mainWindow?.webContents.send('theme-updated', terminalOptions);
       return { success: true };
     });
+
+    // Welcome Screen handlers
+    ipcMain.handle('show-open-dialog', async (event, options: any) => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        const { dialog } = require('electron');
+        const result = await dialog.showOpenDialog(this.mainWindow, options);
+        return result;
+      }
+      return { canceled: true, filePaths: [] };
+    });
+
+    ipcMain.handle('create-project', async (event, projectData: any) => {
+      try {
+        const { name, location, template } = projectData;
+        const fs = require('fs-extra');
+        const path = require('path');
+        
+        const projectPath = path.join(location, name);
+        console.log('📝 Creating project directory:', projectPath);
+        
+        // Create project directory
+        await fs.ensureDir(projectPath);
+        
+        // Create basic project structure based on template
+        switch (template) {
+          case 'node':
+            await fs.writeJson(path.join(projectPath, 'package.json'), {
+              name: name,
+              version: '1.0.0',
+              description: '',
+              main: 'index.js',
+              scripts: {
+                test: 'echo "Error: no test specified" && exit 1'
+              }
+            }, { spaces: 2 });
+            await fs.writeFile(path.join(projectPath, 'index.js'), '// Entry point\nconsole.log("Hello World!");\n');
+            await fs.writeFile(path.join(projectPath, 'README.md'), `# ${name}\n\nA new Node.js project.\n`);
+            break;
+          
+          case 'python':
+            await fs.writeFile(path.join(projectPath, 'main.py'), '# Entry point\nprint("Hello World!")\n');
+            await fs.writeFile(path.join(projectPath, 'requirements.txt'), '# Python dependencies\n');
+            await fs.writeFile(path.join(projectPath, 'README.md'), `# ${name}\n\nA new Python project.\n`);
+            break;
+          
+          case 'react':
+            // Basic React structure (simplified)
+            await fs.writeJson(path.join(projectPath, 'package.json'), {
+              name: name,
+              version: '1.0.0',
+              private: true,
+              dependencies: {
+                react: '^18.2.0',
+                'react-dom': '^18.2.0',
+                'react-scripts': '5.0.1'
+              },
+              scripts: {
+                start: 'react-scripts start',
+                build: 'react-scripts build',
+                test: 'react-scripts test',
+                eject: 'react-scripts eject'
+              }
+            }, { spaces: 2 });
+            
+            await fs.ensureDir(path.join(projectPath, 'src'));
+            await fs.ensureDir(path.join(projectPath, 'public'));
+            
+            await fs.writeFile(path.join(projectPath, 'src/App.js'), 
+              `import React from 'react';\n\nfunction App() {\n  return (\n    <div>\n      <h1>Welcome to ${name}</h1>\n    </div>\n  );\n}\n\nexport default App;\n`);
+            
+            await fs.writeFile(path.join(projectPath, 'src/index.js'),
+              `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(<App />);\n`);
+            
+            await fs.writeFile(path.join(projectPath, 'public/index.html'),
+              `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="utf-8" />\n    <title>${name}</title>\n</head>\n<body>\n    <div id="root"></div>\n</body>\n</html>\n`);
+            
+            await fs.writeFile(path.join(projectPath, 'README.md'), `# ${name}\n\nA new React application.\n\n## Available Scripts\n\n- \`npm start\` - Runs the app in development mode\n- \`npm run build\` - Builds the app for production\n`);
+            break;
+          
+          default:
+            // Empty project - just create README
+            await fs.writeFile(path.join(projectPath, 'README.md'), `# ${name}\n\nA new project.\n`);
+            break;
+        }
+        
+        console.log('✓ Project created successfully');
+        return { success: true, path: projectPath };
+        
+      } catch (error) {
+        console.error('❌ Failed to create project:', error);
+        return { success: false, error: (error as Error).message };
+      }
+    });
+
+    ipcMain.handle('clone-repository', async (event, cloneData: any) => {
+      try {
+        const { url, location } = cloneData;
+        const { spawn } = require('child_process');
+        const path = require('path');
+        
+        console.log('🔄 Cloning repository:', url, 'to', location);
+        
+        return new Promise((resolve) => {
+          const gitProcess = spawn('git', ['clone', url], {
+            cwd: location,
+            stdio: ['ignore', 'pipe', 'pipe']
+          });
+          
+          let output = '';
+          let errorOutput = '';
+          
+          gitProcess.stdout?.on('data', (data: Buffer) => {
+            output += data.toString();
+          });
+          
+          gitProcess.stderr?.on('data', (data: Buffer) => {
+            errorOutput += data.toString();
+          });
+          
+          gitProcess.on('close', (code: number | null) => {
+            if (code === 0) {
+              console.log('✓ Repository cloned successfully');
+              const repoName = url.split('/').pop()?.replace('.git', '') || 'repository';
+              resolve({ 
+                success: true, 
+                path: path.join(location, repoName),
+                output: output
+              });
+            } else {
+              console.error('❌ Git clone failed with code:', code);
+              console.error('Error output:', errorOutput);
+              resolve({ 
+                success: false, 
+                error: errorOutput || `Git clone failed with exit code ${code}`
+              });
+            }
+          });
+          
+          gitProcess.on('error', (error: Error) => {
+            console.error('❌ Git process error:', error);
+            resolve({ 
+              success: false, 
+              error: `Git process error: ${error.message}. Make sure Git is installed and available in PATH.`
+            });
+          });
+        });
+        
+      } catch (error) {
+        console.error('❌ Failed to clone repository:', error);
+        return { success: false, error: (error as Error).message };
+      }
+    });
+
+    ipcMain.handle('change-working-directory', async (event, newPath: string) => {
+      try {
+        const fs = require('fs');
+        
+        // Check if directory exists
+        if (!fs.existsSync(newPath)) {
+          return { success: false, error: 'Directory does not exist' };
+        }
+        
+        // Change process working directory
+        process.chdir(newPath);
+        console.log('📁 Changed working directory to:', newPath);
+        
+        return { success: true, path: newPath };
+      } catch (error) {
+        console.error('❌ Failed to change directory:', error);
+        return { success: false, error: (error as Error).message };
+      }
+    });
   }
 
   async initialize(): Promise<void> {

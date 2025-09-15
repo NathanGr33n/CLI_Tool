@@ -1,0 +1,643 @@
+<!-- Welcome Screen Component -->
+<div class="welcome-screen" id="welcome-screen">
+    <div class="welcome-container">
+        <!-- Header -->
+        <div class="welcome-header">
+            <div class="welcome-logo">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                </svg>
+            </div>
+            <h1 class="welcome-title">CLI Agent</h1>
+            <p class="welcome-subtitle">Advanced terminal with AI-powered assistance</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="welcome-content">
+            <!-- Quick Actions -->
+            <div class="welcome-section">
+                <div class="section-title">Start</div>
+                <div class="action-cards">
+                    <div class="action-card" data-action="create-project">
+                        <div class="action-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                            </svg>
+                        </div>
+                        <div class="action-content">
+                            <div class="action-title">Create new project</div>
+                            <div class="action-description">Set up a new project directory</div>
+                        </div>
+                    </div>
+
+                    <div class="action-card" data-action="open-folder">
+                        <div class="action-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-2l-2-2H8L6 6H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                        </div>
+                        <div class="action-content">
+                            <div class="action-title">Open repository</div>
+                            <div class="action-description">Browse and open an existing project</div>
+                        </div>
+                    </div>
+
+                    <div class="action-card" data-action="clone-repo">
+                        <div class="action-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </div>
+                        <div class="action-content">
+                            <div class="action-title">Clone repository</div>
+                            <div class="action-description">Clone a project from Git repository</div>
+                        </div>
+                    </div>
+
+                    <div class="action-card" data-action="open-terminal">
+                        <div class="action-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zM4 18V8h16v10H4z"/>
+                                <path d="M6 10h2v2H6zm3 0h2v2H9zm3 0h2v2h-2z"/>
+                            </svg>
+                        </div>
+                        <div class="action-content">
+                            <div class="action-title">Open terminal</div>
+                            <div class="action-description">Start with a blank terminal session</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Projects -->
+            <div class="welcome-section">
+                <div class="section-title">Recent</div>
+                <div class="recent-projects" id="recent-projects">
+                    <!-- Recent projects will be dynamically populated -->
+                    <div class="recent-project" data-path="E:\GIT\CLI_Tool">
+                        <div class="project-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="project-info">
+                            <div class="project-name">CLI_Tool</div>
+                            <div class="project-path">E:\GIT\CLI_Tool</div>
+                        </div>
+                        <div class="project-actions">
+                            <button class="project-action-btn" title="Open in new window">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="recent-project" data-path="E:\GIT\Demo_nkgs_financial_dashboard">
+                        <div class="project-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="project-info">
+                            <div class="project-name">Demo_nkgs_financial_dashboard</div>
+                            <div class="project-path">E:\GIT\Demo_nkgs_financial_dashboard</div>
+                        </div>
+                        <div class="project-actions">
+                            <button class="project-action-btn" title="Open in new window">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="recent-project" data-path="E:\GIT\nkgs_website">
+                        <div class="project-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="project-info">
+                            <div class="project-name">nkgs_website</div>
+                            <div class="project-path">E:\GIT\nkgs_website</div>
+                        </div>
+                        <div class="project-actions">
+                            <button class="project-action-btn" title="Open in new window">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="more-actions">
+                    <button class="text-btn" id="clear-recent-btn">Clear recent projects</button>
+                    <button class="text-btn" id="show-more-recent-btn">Show more...</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="welcome-footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link" id="show-help">Help & Documentation</a>
+                <span class="separator">•</span>
+                <a href="#" class="footer-link" id="show-keyboard-shortcuts">Keyboard Shortcuts</a>
+                <span class="separator">•</span>
+                <a href="#" class="footer-link" id="show-settings">Settings</a>
+            </div>
+            <div class="footer-info">
+                <span class="version-info">CLI Agent v1.0.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialogs -->
+    <div class="dialog-overlay" id="create-project-dialog" style="display: none;">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h3>Create New Project</h3>
+                <button class="dialog-close" data-dialog="create-project-dialog">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" placeholder="Enter project name">
+                </div>
+                <div class="form-group">
+                    <label for="project-location">Location</label>
+                    <div class="path-input">
+                        <input type="text" id="project-location" placeholder="Select location" readonly>
+                        <button class="browse-btn" id="browse-location">Browse...</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="project-template">Template</label>
+                    <select id="project-template">
+                        <option value="">Empty Project</option>
+                        <option value="node">Node.js Project</option>
+                        <option value="python">Python Project</option>
+                        <option value="react">React Application</option>
+                        <option value="vue">Vue.js Application</option>
+                    </select>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-secondary" data-dialog="create-project-dialog">Cancel</button>
+                <button class="btn btn-primary" id="create-project-confirm">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-overlay" id="clone-repo-dialog" style="display: none;">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h3>Clone Repository</h3>
+                <button class="dialog-close" data-dialog="clone-repo-dialog">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label for="repo-url">Repository URL</label>
+                    <input type="text" id="repo-url" placeholder="https://github.com/user/repo.git">
+                </div>
+                <div class="form-group">
+                    <label for="clone-location">Clone to</label>
+                    <div class="path-input">
+                        <input type="text" id="clone-location" placeholder="Select location" readonly>
+                        <button class="browse-btn" id="browse-clone-location">Browse...</button>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-secondary" data-dialog="clone-repo-dialog">Cancel</button>
+                <button class="btn btn-primary" id="clone-repo-confirm">Clone</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Welcome Screen Styles */
+.welcome-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary, #1e1e1e);
+    color: var(--text-primary, #cccccc);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.welcome-container {
+    max-width: 1000px;
+    width: 100%;
+}
+
+.welcome-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.welcome-logo {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--accent-blue, #007acc);
+}
+
+.welcome-title {
+    font-size: 32px;
+    font-weight: 300;
+    margin: 0 0 8px 0;
+    color: var(--text-primary, #cccccc);
+}
+
+.welcome-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary, #999);
+    margin: 0;
+}
+
+.welcome-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.welcome-section {
+    width: 100%;
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted, #666);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+.action-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.action-card {
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.action-card:hover {
+    background: var(--bg-hover, #2a2d2e);
+    border-color: var(--accent-blue, #007acc);
+    transform: translateY(-1px);
+}
+
+.action-icon {
+    color: var(--accent-blue, #007acc);
+    flex-shrink: 0;
+}
+
+.action-content {
+    flex: 1;
+}
+
+.action-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-primary, #cccccc);
+}
+
+.action-description {
+    font-size: 12px;
+    color: var(--text-secondary, #999);
+    line-height: 1.4;
+}
+
+.recent-projects {
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.recent-project {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid var(--border-color, #3e3e42);
+}
+
+.recent-project:last-child {
+    border-bottom: none;
+}
+
+.recent-project:hover {
+    background: var(--bg-hover, #2a2d2e);
+}
+
+.project-icon {
+    color: var(--accent-blue, #007acc);
+    margin-right: 12px;
+}
+
+.project-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary, #cccccc);
+    margin-bottom: 2px;
+}
+
+.project-path {
+    font-size: 11px;
+    color: var(--text-muted, #666);
+    font-family: 'Cascadia Code', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.recent-project:hover .project-actions {
+    opacity: 1;
+}
+
+.project-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #666);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.project-action-btn:hover {
+    background: var(--bg-tertiary, #3e3e42);
+    color: var(--text-primary, #cccccc);
+}
+
+.more-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 16px;
+}
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue, #007acc);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 0;
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+}
+
+.text-btn:hover {
+    opacity: 0.8;
+}
+
+.welcome-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color, #3e3e42);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-link {
+    color: var(--accent-blue, #007acc);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.footer-link:hover {
+    opacity: 0.8;
+}
+
+.separator {
+    color: var(--text-muted, #666);
+}
+
+.version-info {
+    color: var(--text-muted, #666);
+}
+
+/* Dialog Styles */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.dialog {
+    background: var(--bg-primary, #1e1e1e);
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 0 20px;
+}
+
+.dialog-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary, #cccccc);
+}
+
+.dialog-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #666);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.dialog-close:hover {
+    background: var(--bg-hover, #2a2d2e);
+    color: var(--text-primary, #cccccc);
+}
+
+.dialog-content {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary, #cccccc);
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 4px;
+    background: var(--bg-secondary, #252526);
+    color: var(--text-primary, #cccccc);
+    font-size: 13px;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-blue, #007acc);
+}
+
+.path-input {
+    display: flex;
+    gap: 8px;
+}
+
+.path-input input {
+    flex: 1;
+}
+
+.browse-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 4px;
+    background: var(--bg-tertiary, #3e3e42);
+    color: var(--text-primary, #cccccc);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.browse-btn:hover {
+    background: var(--bg-hover, #2a2d2e);
+    border-color: var(--accent-blue, #007acc);
+}
+
+.dialog-footer {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary, #999);
+    border-color: var(--border-color, #3e3e42);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover, #2a2d2e);
+    color: var(--text-primary, #cccccc);
+}
+
+.btn-primary {
+    background: var(--accent-blue, #007acc);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #005a9e;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .welcome-screen {
+        padding: 20px 16px;
+    }
+    
+    .action-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .action-card {
+        padding: 16px;
+    }
+    
+    .welcome-footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+}
+
+/* Hide welcome screen initially */
+.welcome-screen.hidden {
+    display: none;
+}
+</style>

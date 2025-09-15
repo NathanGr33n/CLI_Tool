@@ -1,0 +1,160 @@
+<!-- Enhanced Title Bar with Custom Window Controls -->
+<div class="enhanced-title-bar">
+    <div class="title-left">
+        <div class="app-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+            </svg>
+        </div>
+        <div class="title-info">
+            <div class="app-title">CLI Agent</div>
+            <div class="current-path" id="current-path">~/projects</div>
+        </div>
+    </div>
+    
+    <div class="title-center">
+        <div class="session-info">
+            <span class="session-count" id="session-count">3 sessions</span>
+            <span class="separator">•</span>
+            <span class="git-branch" id="git-branch">main ↑2</span>
+        </div>
+    </div>
+    
+    <div class="title-right">
+        <div class="window-controls">
+            <button class="control-btn minimize-btn" id="minimize-btn" title="Minimize">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <rect x="2" y="5.5" width="8" height="1" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="control-btn maximize-btn" id="maximize-btn" title="Maximize">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <rect x="2" y="2" width="8" height="8" stroke="currentColor" stroke-width="1" fill="none"/>
+                </svg>
+            </button>
+            <button class="control-btn close-btn" id="close-btn" title="Close">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.enhanced-title-bar {
+    height: 32px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    -webkit-app-region: drag;
+    user-select: none;
+    font-size: 12px;
+}
+
+.title-left, .title-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    -webkit-app-region: no-drag;
+}
+
+.title-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    -webkit-app-region: no-drag;
+}
+
+.app-icon {
+    display: flex;
+    align-items: center;
+    color: var(--accent-blue);
+    padding: 4px;
+}
+
+.title-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.app-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 11px;
+}
+
+.current-path {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'Cascadia Code', monospace;
+}
+
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.session-count {
+    padding: 2px 6px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.git-branch {
+    color: var(--accent-green);
+    font-family: monospace;
+    font-weight: 500;
+}
+
+.window-controls {
+    display: flex;
+    gap: 1px;
+}
+
+.control-btn {
+    width: 32px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    border-radius: 3px;
+}
+
+.control-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.minimize-btn:hover {
+    background: #f39c12;
+    color: white;
+}
+
+.maximize-btn:hover {
+    background: #27ae60;
+    color: white;
+}
+
+.close-btn:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.separator {
+    opacity: 0.5;
+}
+</style>

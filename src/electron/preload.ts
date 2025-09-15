@@ -34,6 +34,12 @@ interface ElectronAPI {
   getWindowTransparency: () => Promise<{ success: boolean; opacity?: number; error?: string }>;
   applyTheme: (terminalOptions: any) => Promise<{ success: boolean }>;
   
+  // Welcome screen APIs
+  showOpenDialog: (options: any) => Promise<{ canceled: boolean; filePaths: string[] }>;
+  createProject: (projectData: any) => Promise<{ success: boolean; path?: string; error?: string }>;
+  cloneRepository: (cloneData: any) => Promise<{ success: boolean; path?: string; error?: string; output?: string }>;
+  changeDirectory: (newPath: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+  
   // General invoke method for flexibility
   invoke: (channel: string, ...args: any[]) => Promise<any>;
 }
@@ -92,6 +98,12 @@ const electronAPI: ElectronAPI = {
   setWindowTransparency: (opacity: number) => ipcRenderer.invoke('set-window-transparency', opacity),
   getWindowTransparency: () => ipcRenderer.invoke('get-window-transparency'),
   applyTheme: (terminalOptions: any) => ipcRenderer.invoke('apply-theme', terminalOptions),
+  
+  // Welcome screen APIs
+  showOpenDialog: (options: any) => ipcRenderer.invoke('show-open-dialog', options),
+  createProject: (projectData: any) => ipcRenderer.invoke('create-project', projectData),
+  cloneRepository: (cloneData: any) => ipcRenderer.invoke('clone-repository', cloneData),
+  changeDirectory: (newPath: string) => ipcRenderer.invoke('change-working-directory', newPath),
   
   // General invoke method for flexibility
   invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args)

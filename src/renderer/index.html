@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="xterm.css">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Welcome Screen (initially visible) -->
+    <div id="welcome-screen-container"></div>
+    
+    <div class="app-container" id="app-container" style="display: none;">
         <!-- Title bar (optional, can be removed if using native title bar) -->
         <div class="title-bar">
             <div class="title-bar-title">CLI Agent</div>
@@ -94,5 +97,26 @@
 
     <!-- Scripts -->
     <script src="app.js"></script>
+    <script src="welcome.js"></script>
+    <script>
+        // Initialize welcome screen on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load the welcome screen content
+            fetch('welcome-screen.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('welcome-screen-container').innerHTML = html;
+                    // Initialize welcome screen functionality
+                    if (window.WelcomeScreen) {
+                        window.WelcomeScreen.init();
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load welcome screen:', error);
+                    // Show terminal directly if welcome screen fails to load
+                    document.getElementById('app-container').style.display = 'block';
+                });
+        });
+    </script>
 </body>
 </html>

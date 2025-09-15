@@ -1,0 +1,339 @@
+<!-- Enhanced Tab System -->
+<div class="enhanced-tab-bar">
+    <div class="tabs-scrollable" id="tabs-scrollable">
+        <div class="tabs-container" id="enhanced-tabs-container">
+            <!-- Tabs will be dynamically created here -->
+        </div>
+    </div>
+    
+    <div class="tab-controls-enhanced">
+        <div class="shell-selector-enhanced">
+            <button class="shell-btn-enhanced active" data-shell="powershell" title="New PowerShell Tab (Ctrl+Shift+P)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.53 12L20.56 9.22l-.44-.44-.01.01L18.36 7.04a.5.5 0 0 0-.71.71L19.8 10H12.5a.5.5 0 0 0 0 1h7.3l-2.15 2.25a.5.5 0 0 0 .71.71l1.75-1.75h.01l.44-.44L23.53 12zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                </svg>
+                PS
+            </button>
+            <button class="shell-btn-enhanced" data-shell="cmd" title="New Command Prompt Tab (Ctrl+Shift+C)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V8h16v10H4z"/>
+                    <path d="M6 10h2v2H6zm0 4h8v2H6z"/>
+                </svg>
+                CMD
+            </button>
+            <button class="shell-btn-enhanced" data-shell="wsl" title="New WSL Tab (Ctrl+Shift+W)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 3h18v18H3V3zm16 16V5H5v14h14z"/>
+                    <path d="M7 7h2v2H7zm4 0h6v2h-6zm-4 4h10v2H7zm0 4h6v2H7z"/>
+                </svg>
+                WSL
+            </button>
+        </div>
+        
+        <div class="tab-actions">
+            <button class="new-tab-btn-enhanced" id="new-tab-btn-enhanced" title="New Tab (Ctrl+T)">
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" d="M8 3.5a.5.5 0 0 1 .5.5v3.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+            </button>
+            
+            <div class="tab-overflow" id="tab-overflow">
+                <button class="tab-overflow-btn" title="Show all tabs">
+                    <svg width="16" height="16" viewBox="0 0 16 16">
+                        <path fill="currentColor" d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                    </svg>
+                </button>
+                <div class="tab-overflow-menu" id="tab-overflow-menu">
+                    <!-- Overflow tabs will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.enhanced-tab-bar {
+    height: 44px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.tabs-scrollable {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+#enhanced-tabs-container {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 6px 8px;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#enhanced-tabs-container::-webkit-scrollbar {
+    display: none;
+}
+
+.enhanced-tab {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    min-width: 140px;
+    max-width: 240px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-tab:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.enhanced-tab.active {
+    background: var(--bg-primary);
+    border-bottom-color: var(--bg-primary);
+    box-shadow: 0 -2px 0 0 var(--accent-blue) inset;
+}
+
+.tab-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.enhanced-tab.active .tab-icon {
+    opacity: 1;
+}
+
+.tab-icon.powershell { color: #1f6ac7; }
+.tab-icon.cmd { color: #f39c12; }
+.tab-icon.wsl { color: #e95420; }
+.tab-icon.bash { color: #4eaa25; }
+
+.enhanced-tab-title {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.enhanced-tab.active .enhanced-tab-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.tab-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tab-status.active {
+    background: var(--accent-green);
+    opacity: 1;
+}
+
+.tab-status.modified {
+    background: var(--accent-orange);
+    opacity: 1;
+}
+
+.tab-status.error {
+    background: var(--accent-red);
+    opacity: 1;
+}
+
+.enhanced-tab-close {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    margin-left: 4px;
+}
+
+.enhanced-tab:hover .enhanced-tab-close {
+    opacity: 1;
+}
+
+.enhanced-tab-close:hover {
+    background: var(--accent-red);
+    color: white;
+    transform: scale(1.1);
+}
+
+.tab-controls-enhanced {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-left: 1px solid var(--border-color);
+}
+
+.shell-selector-enhanced {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.shell-btn-enhanced {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.shell-btn-enhanced:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.shell-btn-enhanced.active {
+    background: var(--accent-blue);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
+}
+
+.shell-btn-enhanced svg {
+    width: 12px;
+    height: 12px;
+}
+
+.tab-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.new-tab-btn-enhanced {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.new-tab-btn-enhanced:hover {
+    background: var(--accent-blue);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
+}
+
+.tab-overflow {
+    position: relative;
+}
+
+.tab-overflow-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.tab-overflow-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.tab-overflow-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    padding: 8px;
+    min-width: 200px;
+    display: none;
+    z-index: 1000;
+}
+
+.tab-overflow-menu.show {
+    display: block;
+}
+
+.tab-overflow-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tab-overflow-item:hover {
+    background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+    .shell-selector-enhanced {
+        display: none;
+    }
+    
+    .enhanced-tab {
+        min-width: 120px;
+        max-width: 160px;
+    }
+}
+</style>
