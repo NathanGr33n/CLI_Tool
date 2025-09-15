@@ -2,6 +2,11 @@ import { TransparencyManager } from './TransparencyManager.js';
 import { ThemeManager } from './ThemeManager.js';
 import { TransparencyControlsUI } from './TransparencyControls.js';
 
+// Access electronAPI from global scope
+function getElectronAPI(): any {
+  return (global as any).electronAPI || (window as any).electronAPI || null;
+}
+
 export class TransparencyIntegration {
   private transparencyManager: TransparencyManager;
   private themeManager: ThemeManager;
@@ -60,7 +65,8 @@ export class TransparencyIntegration {
 
   private setupThemeUpdateListener(): void {
     // Listen for theme updates from main process
-    window.electronAPI?.invoke('add-theme-listener', (terminalOptions: any) => {
+    const electronAPI = getElectronAPI();
+    electronAPI?.invoke('add-theme-listener', (terminalOptions: any) => {
       console.log('🎨 Theme update received:', terminalOptions);
       // Apply theme to terminals
       this.applyThemeToTerminals(terminalOptions);
@@ -166,12 +172,24 @@ export class TransparencyIntegration {
 // Global instance for easy access
 let transparencyIntegration: TransparencyIntegration | null = null;
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize when DOM is ready (with delay to ensure everything is loaded)
+function initializeTransparency() {
   if (!transparencyIntegration) {
     transparencyIntegration = new TransparencyIntegration();
     (window as any).transparencyIntegration = transparencyIntegration;
   }
-});
+}
+
+// Initialize with a delay to ensure the app is fully loaded
+// Temporarily disabled for testing
+/*
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initializeTransparency, 2000);
+  });
+} else {
+  setTimeout(initializeTransparency, 2000);
+}
+*/
 
 export default TransparencyIntegration;

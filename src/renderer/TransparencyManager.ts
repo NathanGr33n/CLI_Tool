@@ -1,3 +1,8 @@
+// Access electronAPI from global scope
+function getElectronAPI(): any {
+  return (global as any).electronAPI || (window as any).electronAPI || null;
+}
+
 export interface TransparencySettings {
   windowOpacity: number;
   terminalOpacity: number;
@@ -27,7 +32,8 @@ export class TransparencyManager {
     this.settings.windowOpacity = clampedOpacity;
     
     // Apply to Electron window
-    window.electronAPI?.invoke('set-window-transparency', clampedOpacity);
+    const electronAPI = getElectronAPI();
+    electronAPI?.invoke('set-window-transparency', clampedOpacity);
     
     this.saveSettings();
   }
@@ -92,7 +98,8 @@ export class TransparencyManager {
     }
 
     // Apply window transparency
-    window.electronAPI?.invoke('set-window-transparency', this.settings.windowOpacity);
+    const electronAPI = getElectronAPI();
+    electronAPI?.invoke('set-window-transparency', this.settings.windowOpacity);
     
     // Apply CSS transparency
     this.applyTerminalTransparency();
@@ -105,7 +112,8 @@ export class TransparencyManager {
 
   private disableTransparency(): void {
     // Reset window opacity to fully opaque
-    window.electronAPI?.invoke('set-window-transparency', 1.0);
+    const electronAPI = getElectronAPI();
+    electronAPI?.invoke('set-window-transparency', 1.0);
     
     // Reset CSS opacities
     const root = document.documentElement;
@@ -171,7 +179,7 @@ export class TransparencyManager {
     }, 300);
   }
 
-  private loadSettings(): void {
+  public loadSettings(): void {
     try {
       const saved = localStorage.getItem('transparency-settings');
       if (saved) {

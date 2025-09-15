@@ -294,7 +294,6 @@ class App {
       minHeight: 600,
       frame: true,
       titleBarStyle: 'default',
-      transparent: true, // Enable transparency
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
@@ -308,7 +307,7 @@ class App {
         // Enable access to Node.js modules in renderer
         nodeIntegrationInWorker: true
       },
-      backgroundColor: '#00000000', // Fully transparent background
+      backgroundColor: '#1e1e1e', // Dark background
       show: true // Show immediately for debugging
     });
     

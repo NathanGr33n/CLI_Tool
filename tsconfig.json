@@ -35,6 +35,10 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/renderer/TransparencyManager.ts",
+    "src/renderer/TransparencyControls.ts",
+    "src/renderer/transparency-integration.ts",
+    "src/renderer/ThemeManager.ts"
   ]
 }

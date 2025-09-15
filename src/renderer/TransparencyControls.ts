@@ -320,7 +320,7 @@ export class TransparencyControlsUI {
     });
   }
 
-  private updateUI(): void {
+  updateUI(): void {
     const settings = this.transparencyManager.getSettings();
 
     // Update sliders
@@ -361,7 +361,7 @@ export class TransparencyControlsUI {
     }
   }
 
-  private updatePresetButtons(activePreset: string): void {
+  updatePresetButtons(activePreset: string): void {
     const presetBtns = this.container.querySelectorAll('.preset-btn');
     presetBtns.forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-preset') === activePreset);

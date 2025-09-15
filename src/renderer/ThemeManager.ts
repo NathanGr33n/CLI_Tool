@@ -1,3 +1,8 @@
+// Access electronAPI from global scope
+function getElectronAPI(): any {
+  return (global as any).electronAPI || (window as any).electronAPI || null;
+}
+
 export interface Theme {
   name: string;
   colors: {
@@ -198,7 +203,8 @@ export class ThemeManager {
     };
     
     // Notify all terminals to update their theme
-    getElectronAPI()?.invoke('apply-theme', terminalOptions);
+    const electronAPI = getElectronAPI();
+    electronAPI?.invoke('apply-theme', terminalOptions);
     
     // Apply UI theme
     this.applyUITheme(theme.ui);
