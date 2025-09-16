@@ -65,21 +65,113 @@
         </div>
         <!-- End main-content -->
 
-        <!-- Status bar -->
-        <div class="status-bar">
-            <div class="status-left">
-                <span id="current-shell">PowerShell</span>
-                <span class="separator">|</span>
-                <span id="current-directory">~</span>
+    </div>
+
+    <!-- Enhanced Bottom Status Bar -->
+    <div class="bottom-status-bar" id="bottom-status-bar">
+        <!-- Left Section: Session Info -->
+        <div class="status-section-left">
+            <div class="current-shell-info">
+                <div class="shell-indicator" id="shell-indicator">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="shell-icon" id="shell-icon">
+                        <!-- PowerShell icon -->
+                        <path d="M23.53 12L20.56 9.22l-.44-.44-.01.01L18.36 7.04a.5.5 0 0 0-.71.71L19.8 10H12.5a.5.5 0 0 0 0 1h7.3l-2.15 2.25a.5.5 0 0 0 .71.71l1.75-1.75h.01l.44-.44L23.53 12z"/>
+                    </svg>
+                    <span class="shell-name" id="current-shell-status">PowerShell</span>
+                </div>
             </div>
-            <div class="status-right">
-                <button class="agent-toggle-btn" id="agent-toggle-btn" title="Toggle AI Agent">
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            
+            <div class="status-divider"></div>
+            
+            <div class="current-directory-info">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="folder-icon">
+                    <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                </svg>
+                <span class="current-path" id="current-directory-status">C:\Users\Greywater</span>
+            </div>
+            
+            <div class="status-divider"></div>
+            
+            <div class="session-count-info">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                </svg>
+                <span class="session-count" id="session-count-status">1 tab</span>
+            </div>
+        </div>
+
+        <!-- Center Section: Git & Command Status -->
+        <div class="status-section-center">
+            <div class="git-info" id="git-info" style="display: none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="git-icon">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span class="git-branch" id="git-branch-status">main</span>
+                <span class="git-changes" id="git-changes-status"></span>
+            </div>
+            
+            <div class="command-status" id="command-status">
+                <div class="last-command-info">
+                    <span class="command-label">Ready</span>
+                    <span class="command-time" id="command-execution-time"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: System Info & Controls -->
+        <div class="status-section-right">
+            <div class="system-metrics" id="system-metrics">
+                <div class="metric-item cpu-metric">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5 7h2v10H5zm6-4h2v14h-2zm6 7h2v7h-2z"/>
+                    </svg>
+                    <span class="metric-label">CPU</span>
+                    <span class="metric-value" id="cpu-usage-status">--</span>
+                </div>
+                
+                <div class="metric-item memory-metric">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15,9H9V7H15M15,16H9V10H15M21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5Z"/>
+                    </svg>
+                    <span class="metric-label">RAM</span>
+                    <span class="metric-value" id="memory-usage-status">--</span>
+                </div>
+            </div>
+            
+            <div class="status-divider"></div>
+            
+            <div class="connection-info">
+                <div class="connection-status" id="connection-status">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="connection-icon connected">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span class="connection-text" id="connection-status-text">Connected</span>
+                </div>
+            </div>
+            
+            <div class="status-divider"></div>
+            
+            <div class="status-controls">
+                <button class="status-control-btn" id="settings-control-btn" title="Settings (Ctrl+,)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
                     </svg>
                 </button>
-                <span class="separator">|</span>
-                <span id="connection-status">Connected</span>
+                
+                <button class="status-control-btn ai-control-btn" id="ai-control-btn" title="Toggle AI Assistant (Ctrl+Shift+A)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 8V11C19 12.1 18.1 13 17 13S15 12.1 15 11V8L13 7V9C13 11.2 14.8 13 17 13S21 11.2 21 9M9 13C11.2 13 13 11.2 13 9V7L11 8V11C11 12.1 10.1 13 9 13S7 12.1 7 11V8L5 7V9C5 11.2 6.8 13 9 13M12 14C10.9 14 10 14.9 10 16V20C10 21.1 10.9 22 12 22S14 21.1 14 20V16C14 14.9 13.1 14 12 14"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="status-divider"></div>
+            
+            <div class="current-time">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z"/>
+                </svg>
+                <span class="time-display" id="current-time-display">15:30:42</span>
             </div>
         </div>
     </div>
@@ -98,6 +190,7 @@
     <!-- Scripts -->
     <script src="app.js"></script>
     <script src="welcome.js"></script>
+    <script src="bottom-status-controller.js"></script>
     <script>
         // Initialize welcome screen on load
         document.addEventListener('DOMContentLoaded', function() {

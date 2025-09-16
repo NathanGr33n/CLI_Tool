@@ -1,0 +1,471 @@
+<!-- Floating AI Agent Widget - Bottom Right Corner -->
+<div class="floating-ai-widget" id="floating-ai-widget">
+    <!-- Collapsed State - Just the toggle button -->
+    <div class="ai-toggle-fab" id="ai-toggle-fab">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 8V11C19 12.1 18.1 13 17 13S15 12.1 15 11V8L13 7V9C13 11.2 14.8 13 17 13S21 11.2 21 9M9 13C11.2 13 13 11.2 13 9V7L11 8V11C11 12.1 10.1 13 9 13S7 12.1 7 11V8L5 7V9C5 11.2 6.8 13 9 13M12 14C10.9 14 10 14.9 10 16V20C10 21.1 10.9 22 12 22S14 21.1 14 20V16C14 14.9 13.1 14 12 14"/>
+        </svg>
+        <div class="notification-dot" id="notification-dot" style="display: none;"></div>
+    </div>
+    
+    <!-- Expanded State - Chat Window -->
+    <div class="ai-chat-popup" id="ai-chat-popup" style="display: none;">
+        <div class="ai-popup-header">
+            <div class="ai-popup-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 8V11C19 12.1 18.1 13 17 13S15 12.1 15 11V8L13 7V9C13 11.2 14.8 13 17 13S21 11.2 21 9M9 13C11.2 13 13 11.2 13 9V7L11 8V11C11 12.1 10.1 13 9 13S7 12.1 7 11V8L5 7V9C5 11.2 6.8 13 9 13M12 14C10.9 14 10 14.9 10 16V20C10 21.1 10.9 22 12 22S14 21.1 14 20V16C14 14.9 13.1 14 12 14"/>
+                </svg>
+                <span>AI Assistant</span>
+            </div>
+            <div class="ai-popup-controls">
+                <button class="popup-control-btn minimize-popup" id="minimize-popup" title="Minimize">
+                    <svg width="12" height="12" viewBox="0 0 12 12">
+                        <rect x="2" y="5.5" width="8" height="1" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="popup-control-btn close-popup" id="close-popup" title="Close">
+                    <svg width="12" height="12" viewBox="0 0 12 12">
+                        <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="ai-popup-messages" id="ai-popup-messages">
+            <!-- Messages will be populated here -->
+            <div class="ai-welcome-message">
+                <div class="message-content-ai">
+                    <div class="ai-avatar">🤖</div>
+                    <div class="message-text">
+                        <p>Hello! I'm your AI assistant. How can I help you today?</p>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ai-popup-input">
+            <div class="input-container">
+                <input type="text" class="ai-input-field" id="ai-input-field" placeholder="Ask me anything...">
+                <button class="send-btn" id="ai-send-btn" title="Send message">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="quick-actions" id="quick-actions">
+                <button class="quick-action-btn" data-action="help">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C7.59,4 4,12A10,10 0 0,0 12,2Z"/>
+                    </svg>
+                    Help
+                </button>
+                <button class="quick-action-btn" data-action="analyze">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19Z"/>
+                    </svg>
+                    Analyze
+                </button>
+                <button class="quick-action-btn" data-action="commands">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M6.12,15.5L9.86,19.24L11.28,17.83L8.95,15.5L11.28,13.17L9.86,11.76L6.12,15.5Z"/>
+                    </svg>
+                    Commands
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resize Handle -->
+    <div class="resize-handle" id="resize-handle" style="display: none;"></div>
+</div>
+
+<style>
+.floating-ai-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10000;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Floating Action Button (Collapsed State) */
+.ai-toggle-fab {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #007acc 0%, #0099ff 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 122, 204, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: white;
+    position: relative;
+    user-select: none;
+}
+
+.ai-toggle-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 122, 204, 0.4), 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ai-toggle-fab:active {
+    transform: scale(0.95);
+}
+
+.notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    background: #ff4757;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse-notification 2s infinite;
+}
+
+@keyframes pulse-notification {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Chat Popup (Expanded State) */
+.ai-chat-popup {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 380px;
+    height: 500px;
+    background: var(--bg-secondary, #252526);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color, #3e3e42);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    min-width: 320px;
+    min-height: 400px;
+}
+
+.ai-chat-popup.show {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.ai-popup-header {
+    height: 48px;
+    background: linear-gradient(135deg, var(--bg-tertiary, #2d2d30) 0%, var(--bg-secondary, #252526) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-color, #3e3e42);
+    cursor: move;
+    user-select: none;
+}
+
+.ai-popup-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary, #e5e5e5);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.ai-popup-title svg {
+    color: #007acc;
+}
+
+.ai-popup-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.popup-control-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted, #969696);
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.popup-control-btn:hover {
+    background: var(--bg-hover, #3e3e42);
+    color: var(--text-primary, #e5e5e5);
+}
+
+.close-popup:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.ai-popup-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 360px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color, #3e3e42) transparent;
+}
+
+.ai-popup-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-popup-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ai-popup-messages::-webkit-scrollbar-thumb {
+    background: var(--border-color, #3e3e42);
+    border-radius: 3px;
+}
+
+.ai-welcome-message,
+.ai-message-item {
+    margin-bottom: 16px;
+}
+
+.message-content-ai {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.message-content-user {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    flex-direction: row-reverse;
+}
+
+.ai-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007acc, #0099ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    color: white;
+}
+
+.message-text {
+    flex: 1;
+    background: var(--bg-tertiary, #2d2d30);
+    padding: 12px 16px;
+    border-radius: 16px;
+    color: var(--text-primary, #e5e5e5);
+    font-size: 13px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-content-user .message-text {
+    background: #007acc;
+    color: white;
+}
+
+.message-time {
+    font-size: 10px;
+    color: var(--text-muted, #969696);
+    margin-top: 6px;
+    opacity: 0.8;
+}
+
+.ai-popup-input {
+    background: var(--bg-tertiary, #2d2d30);
+    padding: 12px;
+    border-top: 1px solid var(--border-color, #3e3e42);
+}
+
+.input-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.ai-input-field {
+    flex: 1;
+    padding: 10px 12px;
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 20px;
+    color: var(--text-primary, #e5e5e5);
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.ai-input-field:focus {
+    border-color: #007acc;
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.ai-input-field::placeholder {
+    color: var(--text-muted, #969696);
+}
+
+.send-btn {
+    width: 36px;
+    height: 36px;
+    background: #007acc;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.send-btn:hover {
+    background: #005a9e;
+    transform: scale(1.05);
+}
+
+.send-btn:disabled {
+    background: var(--bg-hover, #3e3e42);
+    color: var(--text-muted, #969696);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3e3e42);
+    border-radius: 12px;
+    color: var(--text-secondary, #cccccc);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+    background: #007acc;
+    color: white;
+    border-color: #007acc;
+}
+
+.resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: nw-resize;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ai-chat-popup:hover .resize-handle {
+    opacity: 1;
+}
+
+/* Animation states */
+.floating-ai-widget.minimizing .ai-toggle-fab {
+    animation: minimize-bounce 0.4s ease-out;
+}
+
+@keyframes minimize-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive adjustments */
+@media (max-height: 600px) {
+    .ai-chat-popup {
+        height: 400px;
+        bottom: 60px;
+    }
+    
+    .ai-popup-messages {
+        max-height: 260px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-chat-popup {
+        width: calc(100vw - 40px);
+        right: -40px;
+    }
+    
+    .floating-ai-widget {
+        right: 10px;
+        bottom: 10px;
+    }
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted, #969696);
+    font-size: 12px;
+    font-style: italic;
+    padding: 8px 16px;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 2px;
+}
+
+.typing-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--text-muted, #969696);
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+}
+</style>
