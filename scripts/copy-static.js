@@ -27,6 +27,10 @@ async function copyStaticFiles() {
     await fs.copy('src/renderer/welcome.js', 'dist/renderer/welcome.js');
     console.log('✓ Copied welcome.js');
     
+    // Copy status bar controller
+    await fs.copy('src/renderer/bottom-status-controller.js', 'dist/renderer/bottom-status-controller.js');
+    console.log('✓ Copied bottom-status-controller.js');
+    
     // The JavaScript files should already be compiled by tsc, but let's make sure
     // If the compiled app.js doesn't exist, we can't copy from src since it's TypeScript
     const appJsExists = await fs.pathExists('dist/renderer/app.js');

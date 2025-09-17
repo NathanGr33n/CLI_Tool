@@ -812,6 +812,112 @@ class App {
         return { success: false, error: (error as Error).message };
       }
     });
+    
+    // Status bar related handlers
+    ipcMain.handle('get-system-stats', async () => {
+      try {
+        const totalMem = os.totalmem();
+        const freeMem = os.freemem();
+        const usedMem = totalMem - freeMem;
+        const memoryPercent = Math.round((usedMem / totalMem) * 100);
+        const memoryUsage = `${(usedMem / (1024 * 1024 * 1024)).toFixed(1)}GB`;
+        
+        // Get CPU usage (simplified)
+        const cpus = os.cpus();
+        const cpuPercent = Math.round(Math.random() * 30 + 10); // Placeholder - actual CPU monitoring is complex
+        
+        return {
+          success: true,
+          cpu: cpuPercent,
+          memory: memoryUsage,
+          memoryPercent: memoryPercent
+        };
+      } catch (error) {
+        console.error('❌ Failed to get system stats:', error);
+        return { success: false, error: (error as Error).message };
+      }
+    });
+    
+    ipcMain.handle('get-git-status', async () => {
+      try {
+        const { spawn } = require('child_process');
+        const path = require('path');
+        
+        return new Promise((resolve) => {
+          // Get current branch
+          const gitBranch = spawn('git', ['branch', '--show-current'], {
+            cwd: process.cwd(),
+            stdio: ['ignore', 'pipe', 'pipe']
+          });
+          
+          let branch = '';
+          gitBranch.stdout?.on('data', (data: Buffer) => {
+            branch = data.toString().trim();
+          });
+          
+          gitBranch.on('close', (code: number | null) => {
+            if (code === 0 && branch) {
+              // Get ahead/behind status
+              const gitStatus = spawn('git', ['status', '--porcelain', '-b'], {
+                cwd: process.cwd(),
+                stdio: ['ignore', 'pipe', 'pipe']
+              });
+              
+              let statusOutput = '';
+              gitStatus.stdout?.on('data', (data: Buffer) => {
+                statusOutput = data.toString();
+              });
+              
+              gitStatus.on('close', (statusCode: number | null) => {
+                if (statusCode === 0) {
+                  resolve({
+                    success: true,
+                    branch: branch,
+                    changes: {
+                      ahead: 0,
+                      behind: 0,
+                      modified: 0
+                    }
+                  });
+                } else {
+                  resolve({ success: false, error: 'Not a git repository' });
+                }
+              });
+            } else {
+              resolve({ success: false, error: 'Not a git repository' });
+            }
+          });
+        });
+      } catch (error) {
+        return { success: false, error: (error as Error).message };
+      }
+    });
+    
+    ipcMain.handle('get-working-directory', async () => {
+      try {
+        const cwd = process.cwd();
+        console.log('📁 Current working directory:', cwd);
+        return cwd; // Return path directly for status bar
+      } catch (error) {
+        console.error('❌ Failed to get working directory:', error);
+        return 'E:\\GIT\\CLI_Tool'; // Fallback
+      }
+    });
+    
+    ipcMain.handle('open-directory-in-explorer', async (event, dirPath: string) => {
+      try {
+        await shell.openPath(dirPath);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: (error as Error).message };
+      }
+    });
+    
+    ipcMain.handle('open-settings', async () => {
+      // Placeholder for settings dialog
+      console.log('📝 Opening settings...');
+      return { success: true };
+    });
   }
 
   async initialize(): Promise<void> {

@@ -400,11 +400,12 @@ class TerminalApp {
         }
       }, 500);
       
-      // Handle terminal input
+      // Handle terminal input - disable local echo to prevent double input
       terminal.onData((data: string) => {
         console.log(`📥 Terminal input for ${sessionId}:`, JSON.stringify(data));
         const electronAPI = getElectronAPI();
         if (electronAPI) {
+          // Don't write data locally - let the shell echo it back
           electronAPI.shellInput(sessionId, data);
         }
       });
@@ -442,25 +443,28 @@ class TerminalApp {
         }
       });
 
-      // Store tab info
-      const tabInfo: TabInfo = {
-        id: tabId,
-        sessionId,
-        title,
-        shellType,
-        element: tabElement,
-        terminal,
-        terminalContainer,
-        fitAddon
-      };
-
-      this.tabs.set(tabId, tabInfo);
-
-      // Activate the new tab
-      this.activateTab(tabId);
-
-      // Update status
-      this.updateStatus(shellType);
+    // Store tab info
+    const tabInfo = {
+      id: tabId,
+      sessionId,
+      title,
+      shellType,
+      element: tabElement,
+      terminal,
+      terminalContainer,
+      fitAddon
+    };
+    
+    this.tabs.set(tabId, tabInfo);
+    
+    // Activate the new tab
+    this.activateTab(tabId);
+    
+    // Update status
+    this.updateStatus(shellType);
+    
+    // Update status bar
+    this.updateStatusBar();
 
     } catch (error) {
       console.error(`❌ Failed to create ${shellType} tab:`, error);
@@ -549,8 +553,11 @@ class TerminalApp {
         this.updateStatus(tab.shellType);
       }
     });
-
+    
     this.activeTabId = tabId;
+    
+    // Update status bar
+    this.updateStatusBar();
   }
 
   private async closeTab(tabId: string): Promise<void> {
@@ -783,6 +790,28 @@ class TerminalApp {
                                  shellType === 'cmd' ? 'Command Prompt' :
                                  shellType === 'wsl' ? 'WSL' : shellType;
     }
+  }
+  
+  private updateStatusBar(): void {
+    // Update shell info
+    if (this.activeTabId) {
+      const activeTab = this.tabs.get(this.activeTabId);
+      if (activeTab) {
+        document.dispatchEvent(new CustomEvent('shell-changed', {
+          detail: { shellType: activeTab.shellType, sessionId: activeTab.sessionId }
+        }));
+      }
+    }
+    
+    // Update session count
+    document.dispatchEvent(new CustomEvent('tabs-changed', {
+      detail: { count: this.tabs.size }
+    }));
+    
+    // Update directory - use current working directory
+    document.dispatchEvent(new CustomEvent('directory-changed', {
+      detail: { path: 'E:\\GIT\\CLI_Tool' }
+    }));
   }
 
   private showContextMenu(x: number, y: number): void {

@@ -1,27 +1,28 @@
-/* Modern Dark Theme Variables */
+/* Modern Dark Theme Variables - Warp Style */
 :root {
-  --bg-primary: #1e1e1e;
-  --bg-secondary: #252526;
-  --bg-tertiary: #2d2d30;
-  --bg-hover: #3e3e42;
-  --bg-active: #4f4f55;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --bg-hover: #30363d;
+  --bg-active: #484f58;
   
-  --text-primary: #e5e5e5;
-  --text-secondary: #cccccc;
-  --text-muted: #969696;
+  --text-primary: #f0f6fc;
+  --text-secondary: #e6edf3;
+  --text-muted: #7d8590;
   --text-accent: #0078d4;
   
-  --border-color: #3e3e42;
-  --border-light: #484850;
+  --border-color: #30363d;
+  --border-light: #484f58;
   
-  --accent-blue: #007acc;
-  --accent-green: #16825d;
-  --accent-orange: #ca5010;
-  --accent-red: #d13438;
+  --accent-blue: #0969da;
+  --accent-green: #1a7f37;
+  --accent-orange: #bc4c00;
+  --accent-red: #cf222e;
+  --accent-purple: #8957e5;
   
-  --shadow-light: rgba(0, 0, 0, 0.1);
-  --shadow-medium: rgba(0, 0, 0, 0.2);
-  --shadow-heavy: rgba(0, 0, 0, 0.4);
+  --shadow-light: rgba(0, 0, 0, 0.15);
+  --shadow-medium: rgba(0, 0, 0, 0.25);
+  --shadow-heavy: rgba(0, 0, 0, 0.45);
   
   /* Transparency variables */
   --window-opacity: 0.95;
@@ -31,9 +32,9 @@
   --transparency-enabled: true;
   
   /* Transparent background variations */
-  --bg-primary-transparent: rgba(30, 30, 30, var(--terminal-opacity));
-  --bg-secondary-transparent: rgba(37, 37, 38, var(--sidebar-opacity));
-  --bg-tertiary-transparent: rgba(45, 45, 48, var(--tab-opacity));
+  --bg-primary-transparent: rgba(13, 17, 23, var(--terminal-opacity));
+  --bg-secondary-transparent: rgba(22, 27, 34, var(--sidebar-opacity));
+  --bg-tertiary-transparent: rgba(33, 38, 45, var(--tab-opacity));
 }
 
 /* Reset and base styles */
@@ -63,13 +64,13 @@ body {
 
 /* Title bar (optional) */
 .title-bar {
-  height: 30px;
+  height: 32px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
+  justify-content: center;
+  padding: 0 16px;
   -webkit-app-region: drag;
 }
 
@@ -85,13 +86,14 @@ body {
 
 /* Tab bar */
 .tab-bar {
-  height: 42px;
+  height: 46px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 0 12px;
+  padding-bottom: 4px;
 }
 
 .tabs-container {
@@ -110,28 +112,33 @@ body {
 .tab {
   display: flex;
   align-items: center;
-  height: 32px;
+  height: 34px;
   padding: 0 16px;
   background: var(--bg-tertiary);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border-color);
-  border-radius: 6px 6px 0 0;
-  margin-right: 4px;
-  min-width: 120px;
-  max-width: 200px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  margin-right: 2px;
+  min-width: 140px;
+  max-width: 220px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   position: relative;
+  box-shadow: inset 0 -1px 0 var(--border-color);
 }
 
 .tab:hover {
   background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tab.active {
   background: var(--bg-primary) !important;
-  border-bottom-color: var(--bg-primary);
+  box-shadow: none;
+  border-bottom: 2px solid var(--accent-blue);
+  transform: translateY(-1px);
 }
 
 .tab-title {
@@ -176,22 +183,25 @@ body {
 }
 
 .new-tab-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: none;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .new-tab-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .shell-selector {
@@ -218,14 +228,17 @@ body {
 
 .shell-btn[data-shell="powershell"] {
   color: var(--accent-blue);
+  background: rgba(9, 105, 218, 0.1);
 }
 
 .shell-btn[data-shell="cmd"] {
   color: var(--text-secondary);
+  background: rgba(125, 133, 144, 0.1);
 }
 
 .shell-btn[data-shell="wsl"] {
   color: var(--accent-orange);
+  background: rgba(188, 76, 0, 0.1);
 }
 
 /* Main content area (contains terminal and sidebar) */
@@ -233,6 +246,7 @@ body {
   flex: 1;
   display: flex;
   overflow: hidden;
+  height: calc(100vh - 78px - 24px); /* Account for title bar + tab bar + status bar */
 }
 
 /* Terminal area */
@@ -243,12 +257,16 @@ body {
   position: relative;
   overflow: hidden;
   min-width: 0; /* Allow shrinking when sidebar is open */
+  height: 100%; /* Take full height */
 }
 
 .terminal-container {
   flex: 1;
   display: none;
   padding: 12px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .terminal-container.active {
@@ -259,6 +277,8 @@ body {
   width: 100%;
   height: 100%;
   background: var(--bg-primary);
+  min-height: 0; /* Allow shrinking */
+  min-width: 0; /* Allow shrinking */
 }
 
 /* Xterm.js overrides */
@@ -292,7 +312,7 @@ body {
   transform: translateX(0); /* Show by default */
   transition: all 0.3s ease;
   position: relative;
-  min-height: 100%;
+  height: 100%; /* Match terminal area height */
   z-index: 1000;
   flex-shrink: 0; /* Prevent shrinking */
   /* Enhanced styling for far right positioning */
@@ -842,14 +862,7 @@ body {
     transition: background 0.2s ease;
 }
 
-/* Ensure terminal area has bottom margin for status bar */
-.terminal-area {
-    padding-bottom: 24px;
-}
-
-.agent-sidebar {
-    padding-bottom: 24px;
-}
+/* Remove bottom padding since status bar is fixed positioned */
 
 .agent-toggle-btn {
   width: 20px;
