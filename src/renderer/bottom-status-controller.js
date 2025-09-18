@@ -4,15 +4,21 @@
  */
 class BottomStatusBar {
     constructor() {
+        console.log('📊 BottomStatusBar constructor called');
         this.updateInterval = null;
         this.lastCommand = 'Ready';
         this.lastCommandTime = null;
         this.sessionCount = 1;
         
+        console.log('📊 Initializing elements...');
         this.initializeElements();
+        console.log('📊 Setting up event listeners...');
         this.setupEventListeners();
+        console.log('📊 Starting updates...');
         this.startUpdates();
+        console.log('📊 Updating layout...');
         this.updateLayout();
+        console.log('📊 BottomStatusBar constructor completed');
     }
 
     initializeElements() {
@@ -269,7 +275,12 @@ class BottomStatusBar {
 
         if (this.shellIcon) {
             this.shellIcon.innerHTML = shellIcons[shellType] || shellIcons.cmd;
-            this.shellIcon.className = `shell-icon ${shellType}`;
+            // Use setAttribute for SVG elements instead of className property
+            if (this.shellIcon.tagName.toLowerCase() === 'svg') {
+                this.shellIcon.setAttribute('class', `shell-icon ${shellType}`);
+            } else {
+                this.shellIcon.className = `shell-icon ${shellType}`;
+            }
         }
     }
 
@@ -332,7 +343,12 @@ class BottomStatusBar {
         const isConnected = electronAPI !== null;
         
         if (this.connectionIcon) {
-            this.connectionIcon.className = `connection-icon ${isConnected ? 'connected' : 'disconnected'}`;
+            // Use setAttribute for SVG elements instead of className property
+            if (this.connectionIcon.tagName.toLowerCase() === 'svg') {
+                this.connectionIcon.setAttribute('class', `connection-icon ${isConnected ? 'connected' : 'disconnected'}`);
+            } else {
+                this.connectionIcon.className = `connection-icon ${isConnected ? 'connected' : 'disconnected'}`;
+            }
         }
         
         if (this.connectionText) {
@@ -477,14 +493,25 @@ class BottomStatusBar {
 let bottomStatusBar = null;
 
 function initializeBottomStatusBar() {
+    console.log('📊 Attempting to initialize Bottom Status Bar...');
     const statusBarHTML = document.querySelector('.bottom-status-bar');
+    console.log('📊 Status bar element found:', !!statusBarHTML);
+    
     if (statusBarHTML && !bottomStatusBar) {
-        bottomStatusBar = new BottomStatusBar();
-        
-        // Make it globally accessible
-        window.bottomStatusBar = bottomStatusBar;
-        
-        console.log('📊 Bottom Status Bar initialized');
+        try {
+            bottomStatusBar = new BottomStatusBar();
+            
+            // Make it globally accessible
+            window.bottomStatusBar = bottomStatusBar;
+            
+            console.log('📊 Bottom Status Bar initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize bottom status bar:', error);
+        }
+    } else if (bottomStatusBar) {
+        console.log('📊 Bottom Status Bar already initialized');
+    } else {
+        console.log('❌ Status bar element not found');
     }
 }
 

@@ -188,12 +188,32 @@
     </div>
 
     <!-- Scripts -->
+    <script src="debug-test.js"></script>
     <script src="app.js"></script>
     <script src="welcome.js"></script>
     <script src="bottom-status-controller.js"></script>
     <script>
         // Initialize welcome screen on load
         document.addEventListener('DOMContentLoaded', function() {
+            // Check for quick start parameter or just go directly to terminal for now
+            const urlParams = new URLSearchParams(window.location.search);
+            const quickStart = urlParams.has('quickstart') || true; // Enable quick start for testing
+            
+            if (quickStart) {
+                // Skip welcome screen and go directly to terminal
+                console.log('🚀 Quick start mode - going directly to terminal');
+                document.getElementById('app-container').style.display = 'block';
+                
+                // Ensure terminal app is initialized after DOM is ready
+                setTimeout(() => {
+                    if (window.initializeApp) {
+                        console.log('🎆 Manually triggering terminal app initialization');
+                        window.initializeApp();
+                    }
+                }, 100);
+                return;
+            }
+            
             // Load the welcome screen content
             fetch('welcome-screen.html')
                 .then(response => response.text())

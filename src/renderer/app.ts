@@ -67,7 +67,14 @@ class TerminalApp {
   private circuitBreakerResetTime = 30000; // 30 seconds
 
   constructor() {
-    console.log('🏠 TerminalApp constructor called');
+    console.log('🏠 TerminalApp constructor called - STARTING INITIALIZATION');
+    console.log('🔍 Current DOM state:', {
+      appContainer: !!document.getElementById('app-container'),
+      tabsContainer: !!document.getElementById('tabs-container'),
+      terminalArea: !!document.getElementById('terminal-area'),
+      agentSidebar: !!document.getElementById('agent-sidebar')
+    });
+    
     try {
       this.setupEventListeners();
       console.log('✓ Event listeners set up');
@@ -81,6 +88,7 @@ class TerminalApp {
       console.log('✓ Initial tab creation started');
     } catch (error) {
       console.error('❌ Error in TerminalApp constructor:', error);
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
       throw error;
     }
   }
@@ -230,6 +238,25 @@ class TerminalApp {
   
   private async createInitialTab(): Promise<void> {
     console.log('🎯 Starting initial tab creation...');
+    
+    // Check if required DOM elements exist
+    const tabsContainer = document.getElementById('tabs-container');
+    const terminalArea = document.getElementById('terminal-area');
+    
+    if (!tabsContainer || !terminalArea) {
+      console.error('❌ Required DOM elements not found:', {
+        tabsContainer: !!tabsContainer,
+        terminalArea: !!terminalArea
+      });
+      // Retry after a short delay
+      setTimeout(() => {
+        console.log('🔄 Retrying initial tab creation after DOM elements are ready...');
+        this.createInitialTab();
+      }, 500);
+      return;
+    }
+    
+    console.log('✓ Required DOM elements found, proceeding with tab creation');
     
     // Check circuit breaker
     if (this.isCircuitBreakerOpen()) {
@@ -385,6 +412,41 @@ class TerminalApp {
       
       console.log('✓ Terminal container element found, opening terminal...');
       
+      // Wait for DOM to be fully ready and ensure container is visible
+      const waitForContainer = () => {
+        return new Promise<void>((resolve, reject) => {
+          let attempts = 0;
+          const maxAttempts = 100; // 5 seconds max wait (100 * 50ms)
+          
+          const checkContainer = () => {
+            attempts++;
+            const rect = terminalElement.getBoundingClientRect();
+            
+            if (rect.width > 0 && rect.height > 0) {
+              console.log(`✓ Container ready: ${rect.width}x${rect.height}`);
+              resolve();
+            } else if (attempts >= maxAttempts) {
+              console.warn(`⚠️  Container not visible after ${maxAttempts} attempts, proceeding anyway...`);
+              console.log('📏 Current rect:', rect);
+              console.log('📏 Container styles:', window.getComputedStyle(terminalElement));
+              // Force the container to be visible
+              terminalElement.style.width = '100%';
+              terminalElement.style.height = '400px';
+              terminalElement.style.display = 'block';
+              resolve(); // Proceed anyway
+            } else {
+              if (attempts % 20 === 0) { // Log every second instead of every 50ms
+                console.log(`⏳ Waiting for container to be visible... (attempt ${attempts}/${maxAttempts})`);
+              }
+              setTimeout(checkContainer, 50);
+            }
+          };
+          checkContainer();
+        });
+      };
+      
+      await waitForContainer();
+      
       // Open terminal in container with better error handling
       console.log('✓ Opening terminal in container element:', terminalElement);
       terminal.open(terminalElement);
@@ -410,17 +472,28 @@ class TerminalApp {
         }
       });
 
-      // Fit terminal to container and handle resize
-      setTimeout(() => {
+      // Fit terminal to container with multiple attempts for proper sizing
+      const fitTerminal = (attempt: number = 1) => {
         try {
+          console.log(`📏 Attempting terminal fit #${attempt}`);
           fitAddon.fit();
-          // Send resize information to backend
+          
           const { cols, rows } = terminal;
           console.log(`📱 Terminal sized to ${cols}x${rows}`);
+          
+          // If terminal is still too small, try again
+          if ((cols < 50 || rows < 15) && attempt < 3) {
+            console.log(`⚠️  Terminal size too small (${cols}x${rows}), retrying...`);
+            setTimeout(() => fitTerminal(attempt + 1), 100);
+            return;
+          }
+          
+          // Send resize information to backend
           const electronAPI = getElectronAPI();
           if (electronAPI) {
             electronAPI.terminalResize(sessionId, cols, rows);
           }
+          
           // Focus terminal for immediate interaction
           terminal.focus();
           
@@ -428,11 +501,20 @@ class TerminalApp {
           terminal.write('\r\n[32mTerminal Ready - Waiting for shell connection...[0m\r\n');
           terminal.write('Shell: ' + shellType + '\r\n');
           
-          console.log('✓ Terminal fitted, focused, and initial content written');
+          console.log(`✓ Terminal fitted successfully: ${cols}x${rows}`);
         } catch (error) {
-          console.error('❌ Error during terminal setup:', error);
+          console.error('❌ Error during terminal fit:', error);
         }
-      }, 200);
+      };
+      
+      // Initial fit with delay
+      setTimeout(() => fitTerminal(1), 100);
+      
+      // Additional fit after DOM is fully rendered
+      setTimeout(() => {
+        console.log('🔄 Additional terminal fit for safety');
+        fitTerminal(99); // Special attempt number to skip retry logic
+      }, 500);
       
       // Handle terminal resize events
       terminal.onResize(({ cols, rows }: { cols: number, rows: number }) => {
@@ -541,11 +623,30 @@ class TerminalApp {
         tab.element.classList.add('active');
         tab.terminalContainer.classList.add('active');
         
-        // Focus terminal and resize
+        // Focus terminal and resize with better timing
         if (tab.terminal && tab.fitAddon) {
           setTimeout(() => {
-            tab.terminal!.focus();
-            tab.fitAddon!.fit();
+            try {
+              console.log(`🔄 Activating tab ${id}, fitting terminal...`);
+              tab.fitAddon.fit();
+              
+              const { cols, rows } = tab.terminal;
+              console.log(`📱 Active terminal sized to: ${cols}x${rows}`);
+              
+              tab.terminal.focus();
+              
+              // If terminal is too small, try one more time
+              if (cols < 50 || rows < 15) {
+                setTimeout(() => {
+                  console.log('🔄 Retrying terminal fit for small size');
+                  tab.fitAddon.fit();
+                  const { cols: newCols, rows: newRows } = tab.terminal;
+                  console.log(`📱 Retry result: ${newCols}x${newRows}`);
+                }, 100);
+              }
+            } catch (error) {
+              console.error('❌ Error fitting terminal on activation:', error);
+            }
           }, 50);
         }
         
@@ -641,21 +742,37 @@ class TerminalApp {
     
     const activeTab = this.tabs.get(this.activeTabId);
     if (activeTab && activeTab.terminal && activeTab.fitAddon) {
-      setTimeout(() => {
-        activeTab.fitAddon!.fit();
-        
-        // Notify backend of resize if session exists
-        if (activeTab.sessionId) {
-          const { cols, rows } = activeTab.terminal!;
-          const electronAPI = getElectronAPI();
-          if (electronAPI) {
-            electronAPI.terminalResize(activeTab.sessionId, cols, rows);
+      const performResize = (attempt: number = 1) => {
+        try {
+          console.log(`📱 Resizing terminal attempt #${attempt}`);
+          activeTab.fitAddon.fit();
+          
+          const { cols, rows } = activeTab.terminal;
+          console.log(`📱 Terminal resized to: ${cols}x${rows}`);
+          
+          // If still too small and we haven't tried too many times, retry
+          if ((cols < 50 || rows < 15) && attempt < 2) {
+            setTimeout(() => performResize(attempt + 1), 150);
+            return;
           }
+          
+          // Notify backend of resize if session exists
+          if (activeTab.sessionId) {
+            const electronAPI = getElectronAPI();
+            if (electronAPI) {
+              electronAPI.terminalResize(activeTab.sessionId, cols, rows);
+            }
+          }
+          
+          // Refocus terminal after resize
+          activeTab.terminal.focus();
+          
+        } catch (error) {
+          console.error('❌ Error during terminal resize:', error);
         }
-        
-        // Refocus terminal after resize
-        activeTab.terminal!.focus();
-      }, 100);
+      };
+      
+      setTimeout(() => performResize(1), 100);
     }
   }
 
@@ -793,10 +910,16 @@ class TerminalApp {
   }
   
   private updateStatusBar(): void {
+    console.log('📊 Updating status bar...', {
+      activeTabId: this.activeTabId,
+      tabCount: this.tabs.size
+    });
+    
     // Update shell info
     if (this.activeTabId) {
       const activeTab = this.tabs.get(this.activeTabId);
       if (activeTab) {
+        console.log('📊 Dispatching shell-changed event:', activeTab.shellType);
         document.dispatchEvent(new CustomEvent('shell-changed', {
           detail: { shellType: activeTab.shellType, sessionId: activeTab.sessionId }
         }));
@@ -804,11 +927,13 @@ class TerminalApp {
     }
     
     // Update session count
+    console.log('📊 Dispatching tabs-changed event:', this.tabs.size);
     document.dispatchEvent(new CustomEvent('tabs-changed', {
       detail: { count: this.tabs.size }
     }));
     
     // Update directory - use current working directory
+    console.log('📊 Dispatching directory-changed event');
     document.dispatchEvent(new CustomEvent('directory-changed', {
       detail: { path: 'E:\\GIT\\CLI_Tool' }
     }));
@@ -876,6 +1001,8 @@ let appInitialized = false;
 
 // Initialize the app when DOM is loaded
 function initializeApp() {
+  console.log('🚀 STARTING initializeApp function...');
+  
   if (appInitialized) {
     console.log('⚠️ App already initialized, skipping...');
     return;
@@ -883,6 +1010,14 @@ function initializeApp() {
   appInitialized = true;
   
   console.log('🎯 DOM Content Loaded - Initializing Terminal App...');
+  
+  // Check if app container is visible
+  const appContainer = document.getElementById('app-container');
+  console.log('📄 App container status:', {
+    exists: !!appContainer,
+    visible: appContainer?.style.display !== 'none',
+    display: appContainer?.style.display
+  });
   
   // Check if required libraries are available
   console.log('Checking required libraries:');
@@ -916,6 +1051,9 @@ function initializeApp() {
     `;
   }
 }
+
+// Expose initializeApp globally for manual triggering
+(window as any).initializeApp = initializeApp;
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

@@ -286,7 +286,7 @@ class App {
 
   async createWindow(): Promise<void> {
     this.windowStartTime = Date.now();
-    // Create the browser window
+    // Create the browser window with enhanced stability settings
     this.mainWindow = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -294,6 +294,13 @@ class App {
       minHeight: 600,
       frame: true,
       titleBarStyle: 'default',
+      closable: true,
+      minimizable: true,
+      maximizable: true,
+      resizable: true,
+      focusable: true,
+      alwaysOnTop: false,
+      skipTaskbar: false,
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
@@ -305,7 +312,9 @@ class App {
         webSecurity: false, // Allow local file access
         allowRunningInsecureContent: true,
         // Enable access to Node.js modules in renderer
-        nodeIntegrationInWorker: true
+        nodeIntegrationInWorker: true,
+        // Additional stability settings
+        spellcheck: false
       },
       backgroundColor: '#1e1e1e', // Dark background
       show: false // Wait for ready-to-show event
@@ -354,6 +363,12 @@ class App {
       if (this.mainWindow) {
         this.mainWindow.focus();
         console.log('✓ Window shown and focused');
+        
+        // Open DevTools in development mode
+        if (process.env.NODE_ENV === 'development' || process.argv.includes('--dev')) {
+          this.mainWindow.webContents.openDevTools();
+          console.log('🔧 DevTools opened for debugging');
+        }
       }
     });
     
@@ -376,11 +391,51 @@ class App {
       this.mainWindow = null;
     });
     
-    // Log window close events for debugging
+    // Log window close events for debugging and prevent unwanted closing
     this.mainWindow.on('close', (event) => {
       console.log('🚨 Window close event triggered');
       const uptime = Date.now() - this.windowStartTime;
       console.log(`⏱️  Window was open for ${uptime}ms`);
+      
+      // Check if the close was triggered too early (likely automatic)
+      if (uptime < 30000) { // Less than 30 seconds
+        console.log('⚠️  Window closed too early - this might be automatic');
+        console.log('🔍 Close event details:', {
+          hasVisibleWindows: BrowserWindow.getAllWindows().filter(w => w.isVisible()).length,
+          totalWindows: BrowserWindow.getAllWindows().length,
+          windowExists: !!this.mainWindow
+        });
+        
+        // In development/testing mode, prevent the close and show a warning
+        if (process.env.NODE_ENV === 'development' || process.argv.includes('--prevent-auto-close')) {
+          event.preventDefault();
+          console.log('🛡️  Auto-close prevented in development mode');
+          console.log('💡 To close this window, use Ctrl+Q or the File menu');
+          
+          // Show a notification in the window
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.webContents.executeJavaScript(`
+              console.log('🛡️  Window close prevented - use Ctrl+Q to quit');
+              // Remove any existing close prevention notification first
+              const existingNotification = document.getElementById('close-prevention-notification');
+              if (existingNotification) {
+                existingNotification.remove();
+              }
+              const closeNotification = document.createElement('div');
+              closeNotification.id = 'close-prevention-notification';
+              closeNotification.style.cssText = 'position:fixed;top:10px;right:10px;background:#333;color:#fff;padding:10px;border-radius:5px;z-index:9999;font-family:monospace;';
+              closeNotification.textContent = '🛡️ Auto-close prevented. Use Ctrl+Q to quit.';
+              document.body.appendChild(closeNotification);
+              setTimeout(() => {
+                if (document.getElementById('close-prevention-notification')) {
+                  closeNotification.remove();
+                }
+              }, 5000);
+            `);
+          }
+          return;
+        }
+      }
     });
 
     // Handle external links
